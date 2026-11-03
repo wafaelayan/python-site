@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منصة بايثون التعليمية - مدرسة موضي سلطان العيسى الثانوية بنات</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- الخطوط الرسمية -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- محرر CodeMirror -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/eclipse.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.js"></script>
+
+  <!-- Firebase Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+  <!-- محرك تشغيل بايثون في المتصفح Pyodide -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+
+  <style>
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      height: 100dvh; /* توافق مثالي مع متصفحات الهواتف */
+    }
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+    .CodeMirror {
+      height: 100%;
+      font-family: 'Fira Code', monospace;
+      font-size: 15px; /* حجم خط مثالي للهواتف والحواسيب */
+      line-height: 1.6;
+      direction: ltr;
+      text-align: left;
+      background-color: #ffffff;
+    }
+    @media (max-width: 640px) {
+      .CodeMirror {
+        font-size: 13.5px;
+      }
+    }
+    .CodeMirror-gutters {
+      background-color: #f8fafc;
+      border-right: 1px solid #e2e8f0;
+    }
+    .CodeMirror-linenumber {
+      color: #94a3b8;
+    }
+    .CodeMirror-hints {
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      z-index: 1000;
+      border: 1px solid #4b5563;
+      background: #1e1f22;
+      border-radius: 6px;
+      padding: 4px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+    .CodeMirror-hint {
+      color: #bcbec4;
+      border-radius: 4px;
+      padding: 3px 8px;
+    }
+    .CodeMirror-hint-active {
+      background: #2e436e !important;
+      color: #ffffff !important;
+      font-weight: 600;
+    }
+    #pycharmConsole {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      line-height: 1.6;
+      background-color: #1e1f22;
+      color: #bcbec4;
+      direction: ltr;
+      text-align: left;
+    }
+    .console-input-inline {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #56a8f5;
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      font-weight: 600;
+      width: 100%;
+      caret-color: #56a8f5;
+      padding: 0;
+      margin: 0;
+    }
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen select-none">
+
+  <!-- ==================== شريط الرأس العلوي (متجاوب للهواتف) ==================== -->
+  <header class="bg-white border-b border-slate-200 px-2 sm:px-4 py-2 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 z-30 shadow-sm shrink-0">
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- الشعار الرسمي الدقيق لمدرسة موضي سلطان العيسى -->
+      <div id="schoolLogoTrigger" class="cursor-pointer flex items-center gap-2 sm:gap-3 group" title="مدرسة موضي سلطان العيسى الثانوية بنات">
+        <div class="w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center shrink-0 drop-shadow-sm transition-transform group-hover:scale-105">
+          <svg class="w-full h-full" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="headerOuterArch" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#EAA12B"/>
+                <stop offset="50%" stop-color="#F2B543"/>
+                <stop offset="100%" stop-color="#EAA12B"/>
+              </linearGradient>
+              <linearGradient id="headerInnerArch" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#F7D37E"/>
+                <stop offset="50%" stop-color="#FDE6A6"/>
+                <stop offset="100%" stop-color="#F7D37E"/>
+              </linearGradient>
+            </defs>
+
+            <!-- القوسان الذهبيان -->
+            <path d="M 25 300 L 70 300 A 185 185 0 0 1 205 130 L 205 85 A 230 230 0 0 0 25 300 Z" fill="url(#headerOuterArch)"/>
+            <path d="M 475 300 L 430 300 A 185 185 0 0 0 295 130 L 295 85 A 230 230 0 0 1 475 300 Z" fill="url(#headerOuterArch)"/>
+            <path d="M 85 300 L 125 300 A 130 130 0 0 1 210 180 L 210 140 A 170 170 0 0 0 85 300 Z" fill="url(#headerInnerArch)"/>
+            <path d="M 415 300 L 375 300 A 130 130 0 0 0 290 180 L 290 140 A 170 170 0 0 1 415 300 Z" fill="url(#headerInnerArch)"/>
+
+            <!-- صفحات الكتاب -->
+            <path d="M 245 400 C 180 390 110 395 70 415 L 70 375 C 110 355 180 350 245 365 Z" fill="#0A314D"/>
+            <path d="M 245 360 C 180 345 120 348 85 362 L 85 335 C 120 320 180 320 245 335 Z" fill="#0D3F63"/>
+            <path d="M 245 330 C 185 315 140 315 110 325 L 110 305 C 140 295 185 298 245 312 Z" fill="#0A314D"/>
+            <path d="M 255 400 C 320 390 390 395 430 415 L 430 375 C 390 355 320 350 255 365 Z" fill="#0A314D"/>
+            <path d="M 255 360 C 320 345 380 348 415 362 L 415 335 C 380 320 320 320 255 335 Z" fill="#0D3F63"/>
+            <path d="M 255 330 C 315 315 360 315 390 325 L 390 305 C 360 295 315 298 255 312 Z" fill="#0A314D"/>
+
+            <!-- قلم الحبر والخطوط المائلة والريشة -->
+            <polygon points="230,135 270,135 264,265 236,265" fill="#0E3D61"/>
+            <polygon points="230,150 240,140 270,165 268,175" fill="#FFFFFF"/>
+            <polygon points="231,185 242,175 267,198 266,208" fill="#FFFFFF"/>
+            <polygon points="233,220 244,210 265,230 264,240" fill="#FFFFFF"/>
+            <rect x="235" y="265" width="30" height="7" rx="2" fill="#E2E8F0" stroke="#0A314D" stroke-width="1.5"/>
+
+            <path d="M 235 272 L 265 272 L 273 318 C 273 345 250 392 250 392 C 250 392 227 345 227 318 Z" fill="#D8DEE4" stroke="#0A314D" stroke-width="3"/>
+            <path d="M 240 275 L 260 275 L 266 315 C 266 338 250 375 250 375 C 250 375 234 338 234 315 Z" fill="#F1F5F9"/>
+            <circle cx="250" cy="330" r="4.5" fill="#0A314D"/>
+            <line x1="250" y1="334.5" x2="250" y2="392" stroke="#0A314D" stroke-width="2.5"/>
+
+            <!-- شعلة علم الكويت في القمة -->
+            <path d="M 250 15 C 242 35 233 55 244 72 C 246 55 253 45 250 15 Z" fill="#000000"/>
+            <path d="M 240 45 C 223 60 220 85 235 110 C 238 92 236 78 244 70 C 238 60 238 52 240 45 Z" fill="#007A3D"/>
+            <path d="M 248 40 C 238 60 246 88 248 108 C 255 90 258 75 252 55 Z" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="0.8"/>
+            <path d="M 258 55 C 275 70 278 95 264 118 C 268 98 266 82 256 70 Z" fill="#CE1126"/>
+            <ellipse cx="250" cy="132" rx="18" ry="4" fill="#0A314D"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xs sm:text-base font-extrabold text-slate-800 leading-tight">ثانوية موضي سلطان العيسى</h1>
+          <p class="text-[10px] sm:text-xs font-semibold text-amber-700">إعداد: أ. وفاء عليان</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- الأزرار الرئيسية الثلاثة (قابلة للتمرير الأفقي على الشاشات الصغيرة) -->
+    <div class="flex items-center gap-1.5 overflow-x-auto py-1 max-w-full">
+      <button id="openPracticesBtn" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-sm flex items-center gap-1 shrink-0 transition-all shadow-sm">
+        <span>💡</span> <span class="hidden xs:inline">تدريبات</span> إضافية
+      </button>
+
+      <button id="openSolutionsBtn" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-sm flex items-center gap-1 shrink-0 transition-all shadow-sm">
+        <span>📖</span> حلول أوراق العمل
+      </button>
+
+      <button id="openProjectBtn" class="bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-300 font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-sm flex items-center gap-1 shrink-0 transition-all shadow-sm">
+        <span>🚀</span> المشروع
+      </button>
+    </div>
+
+    <!-- بيانات المستخدم -->
+    <div class="flex items-center gap-2">
+      <div id="currentUserBadge" class="hidden items-center gap-1.5 bg-slate-100 border border-slate-300 px-2 sm:px-3 py-1 rounded-lg">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="currentUserNameText" class="text-[11px] sm:text-xs font-bold text-slate-800 truncate max-w-[110px] sm:max-w-none"></span>
+        <button id="logoutBtn" class="text-rose-600 hover:text-rose-800 font-bold text-xs mr-1 transition-colors" title="تسجيل الخروج">خروج ↩</button>
+      </div>
+
+      <button id="openTeacherDashboardDirectBtn" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs shadow-sm flex items-center gap-1 transition-all">
+        <span>🔒</span> لوحة المعلمة
+      </button>
+
+      <button id="showLoginModalBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition-all">
+        دخول
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== مساحة العمل ==================== -->
+  <main class="flex-1 flex overflow-hidden relative">
+    <div class="flex-1 flex flex-col min-w-0 bg-white">
+      <!-- شريط الأدوات العلوي للمحرر (متجاوب) -->
+      <div class="bg-slate-100 border-b border-slate-200 px-2 sm:px-4 py-1.5 flex items-center justify-between gap-1 overflow-x-auto shrink-0">
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="runCodeBtn" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1 shadow-sm transition-all">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><polygon points="5 3 19 10 5 17"/></svg>
+            <span>Run</span>
+          </button>
+
+          <!-- زر التأكد من الحل (يظهر فقط مع التدريبات الإضافية) -->
+          <button id="checkSolutionBtn" class="hidden bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1 shadow-sm transition-all">
+            <span>✨</span> التأكد من الحل
+          </button>
+
+          <!-- زر الإرسال للمعلمة (يظهر فقط عند حل المشروع) -->
+          <button id="submitToTeacherBtn" class="hidden bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-900 font-bold px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1 shadow-sm transition-all">
+            <span>📤</span> إرسال للمعلمة
+          </button>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <!-- زر إنشاء ملف بايثون جديد للطالبة -->
+          <button id="createNewFileBtn" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 font-bold px-2 py-1 rounded text-[11px] sm:text-xs flex items-center gap-1 shadow-sm transition-all" title="إنشاء ملف بايثون جديد">
+            <span>➕</span> ملف جديد
+          </button>
+          <span id="activeFileNameBadge" class="text-[11px] sm:text-xs font-mono font-bold bg-white text-slate-700 border border-slate-300 px-2 py-0.5 rounded shadow-inner truncate max-w-[90px] sm:max-w-none">
+            editor.py
+          </span>
+          <button id="clearEditorBtn" class="text-slate-600 hover:text-slate-900 border border-slate-300 bg-white hover:bg-slate-50 font-semibold px-2 py-0.5 rounded text-[11px] sm:text-xs transition-colors" title="مسح شاشة المحرر">
+            🧹 مسح
+          </button>
+          <button id="exportCodeBtn" class="hidden text-slate-600 hover:text-slate-900 border border-slate-300 bg-white hover:bg-slate-50 font-semibold px-2 py-0.5 rounded text-[11px] sm:text-xs transition-colors">
+            💾 حفظ
+          </button>
+        </div>
+      </div>
+
+      <!-- شريط تبويبات الملفات المفتوحة للطالبة -->
+      <div id="editorTabsContainer" class="bg-slate-200 border-b border-slate-300 px-2 pt-1 flex items-center gap-1 overflow-x-auto shrink-0 select-none">
+        <!-- يتم توليد ألسنة التبويب هنا تلقائياً -->
+      </div>
+
+      <!-- محرر CodeMirror -->
+      <div class="flex-1 relative overflow-hidden bg-white min-h-[140px]">
+        <textarea id="codeEditorArea"></textarea>
+      </div>
+
+      <!-- كونسول PyCharm التفاعلي المباشر (ارتفاع متكيف مع الهواتف) -->
+      <div class="h-44 sm:h-56 border-t-2 border-slate-300 flex flex-col shrink-0 bg-[#1e1f22]">
+        <div class="bg-[#2b2d30] border-b border-[#1e1f22] px-2.5 sm:px-3 py-1 sm:py-1.5 flex items-center justify-between text-[11px] sm:text-xs text-[#bcbec4]">
+          <div class="flex items-center gap-1.5">
+            <span id="consoleIndicatorDot" class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500"></span>
+            <span class="font-bold tracking-wide">PyCharm Terminal</span>
+          </div>
+          <span id="engineStatusBadge" class="text-[10px] sm:text-[11px] text-emerald-400 font-bold">بايثون جاهز</span>
+        </div>
+        
+        <div id="pycharmConsole" class="flex-1 p-2 sm:p-3 overflow-y-auto">
+          <div class="text-[#808389] text-xs">/usr/bin/python3.11 -u script.py</div>
+          <div id="consoleOutputs"></div>
+          <div id="consoleInputRow" class="hidden items-center mt-1">
+            <span id="consolePromptLabel" class="text-[#bcbec4] mr-1 select-none whitespace-pre text-xs"></span>
+            <input type="text" id="consoleInlineInput" class="console-input-inline text-xs sm:text-sm" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- القائمة الجانبية (شاشة كاملة على الهواتف لتسهيل القراءة) -->
+    <aside id="sideDrawer" class="hidden absolute sm:static inset-0 sm:inset-auto sm:w-80 bg-white sm:border-r border-slate-200 flex flex-col z-40 shadow-2xl sm:shadow-lg">
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 id="drawerTitle" class="font-bold text-slate-800 text-sm">محتوى النشاط</h3>
+        <button id="closeDrawerBtn" class="text-slate-500 hover:text-rose-600 font-bold text-xl leading-none p-1 transition-colors">&times;</button>
+      </div>
+      <div id="drawerContent" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
+    </aside>
+  </main>
+
+  <!-- ==================== نافذة تسجيل الدخول (متجاوبة للهاتف) ==================== -->
+  <div id="loginModalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm sm:max-w-md overflow-hidden max-h-[95vh] flex flex-col">
+      <div class="bg-gradient-to-b from-amber-50/80 via-white to-white p-4 sm:p-6 text-center border-b border-slate-100 flex flex-col items-center shrink-0">
+        <div class="w-14 h-14 sm:w-20 sm:h-20 mb-2 flex items-center justify-center">
+          <svg class="w-full h-full drop-shadow-md" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 25 300 L 70 300 A 185 185 0 0 1 205 130 L 205 85 A 230 230 0 0 0 25 300 Z" fill="#EAA12B"/>
+            <path d="M 475 300 L 430 300 A 185 185 0 0 0 295 130 L 295 85 A 230 230 0 0 1 475 300 Z" fill="#EAA12B"/>
+            <path d="M 85 300 L 125 300 A 130 130 0 0 1 210 180 L 210 140 A 170 170 0 0 0 85 300 Z" fill="#F7D37E"/>
+            <path d="M 415 300 L 375 300 A 130 130 0 0 0 290 180 L 290 140 A 170 170 0 0 1 415 300 Z" fill="#F7D37E"/>
+            <path d="M 245 400 C 180 390 110 395 70 415 L 70 375 C 110 355 180 350 245 365 Z" fill="#0A314D"/>
+            <path d="M 255 400 C 320 390 390 395 430 415 L 430 375 C 390 355 320 350 255 365 Z" fill="#0A314D"/>
+            <polygon points="230,135 270,135 264,265 236,265" fill="#0E3D61"/>
+            <path d="M 235 272 L 265 272 L 273 318 C 273 345 250 392 250 392 C 250 392 227 345 227 318 Z" fill="#D8DEE4" stroke="#0A314D" stroke-width="3"/>
+            <circle cx="250" cy="330" r="4.5" fill="#0A314D"/>
+            <line x1="250" y1="334.5" x2="250" y2="392" stroke="#0A314D" stroke-width="2.5"/>
+            <path d="M 250 15 C 242 35 233 55 244 72 C 246 55 253 45 250 15 Z" fill="#000000"/>
+            <path d="M 240 45 C 223 60 220 85 235 110 C 238 92 236 78 244 70 C 238 60 238 52 240 45 Z" fill="#007A3D"/>
+            <path d="M 248 40 C 238 60 246 88 248 108 C 255 90 258 75 252 55 Z" fill="#F8FAFC"/>
+            <path d="M 258 55 C 275 70 278 95 264 118 C 268 98 266 82 256 70 Z" fill="#CE1126"/>
+          </svg>
+        </div>
+        <h2 class="text-sm sm:text-base font-black text-slate-800">مدرسة موضي سلطان العيسى الثانوية بنات</h2>
+        <p class="text-[11px] sm:text-xs font-bold text-amber-700">إعداد وتصميم: أ. وفاء عليان</p>
+      </div>
+
+      <div class="flex border-b border-slate-200 shrink-0">
+        <button id="tabStudentBtn" class="flex-1 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-all">
+          👩‍🎓 دخول الطالبة
+        </button>
+        <button id="tabTeacherBtn" class="flex-1 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 transition-all">
+          🔒 دخول المعلمة
+        </button>
+      </div>
+
+      <div class="p-4 sm:p-6 overflow-y-auto">
+        <!-- دخول الطالبة -->
+        <div id="studentLoginSection" class="space-y-3 sm:space-y-4">
+          <div>
+            <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">اختاري الصف :</label>
+            <select id="modalClassSelect" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+              <option value="">-- اختاري الصف أولاً --</option>
+              <option value="10-1">فصل 10-1</option>
+              <option value="10-2">فصل 10-2</option>
+              <option value="10-3">فصل 10-3</option>
+              <option value="10-4">فصل 10-4</option>
+              <option value="10-5">فصل 10-5</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">اختاري الاسم :</label>
+            <select id="modalStudentSelect" disabled class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+              <option value="">-- حددي الصف لتظهر الأسماء --</option>
+            </select>
+          </div>
+
+          <div id="studentLoginError" class="text-xs font-bold text-rose-600 hidden text-center"></div>
+
+          <button id="confirmStudentLoginBtn" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm shadow-md transition-all mt-1">
+            دخول المنصة 🚀
+          </button>
+        </div>
+
+        <!-- دخول المعلمة -->
+        <div id="teacherLoginSection" class="space-y-3 sm:space-y-4 hidden">
+          <div>
+            <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">أدخلي كلمة المرور :</label>
+            <input type="password" id="modalTeacherPasswordInput" placeholder="••••••••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm font-mono text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-center tracking-wider">
+          </div>
+
+          <div id="teacherLoginError" class="text-xs font-bold text-rose-600 hidden text-center"></div>
+
+          <button id="confirmTeacherLoginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm shadow-md transition-all">
+            تأكيد الدخول للوحة التحكم 🔒
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== نافذة لوحة تحكم المعلمة ==================== -->
+  <div id="teacherDashboardModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-2 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[96vh] flex flex-col overflow-hidden">
+      <div class="bg-slate-900 text-white p-3 sm:p-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400 text-base sm:text-lg">⚙️</span>
+          <h3 class="font-extrabold text-xs sm:text-base">لوحة تحكم المعلمة - أ. وفاء عليان</h3>
+        </div>
+        <button id="closeTeacherDashboardBtn" class="text-slate-400 hover:text-white font-bold text-2xl leading-none px-2">&times;</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-3 sm:p-5 space-y-4 sm:space-y-6 bg-slate-50">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400 text-lg">⚙️</span>
+          <h3 class="font-extrabold text-base">لوحة تحكم المعلمة - أ. وفاء عليان</h3>
+        </div>
+        <button id="closeTeacherDashboardBtn" class="text-slate-400 hover:text-white font-bold text-xl leading-none">&times;</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-5 space-y-6 bg-slate-50">
+        <!-- حذف المشروع المنشور -->
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">المشروع المنشور حالياً في السحابة</span>
+            <button id="cancelCurrentTaskBtn" class="text-rose-600 hover:text-rose-800 font-bold text-xs bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+              <span>🗑</span> حذف المشروع المنشور حالياً من أجهزة الطالبات
+            </button>
+          </div>
+          <div id="activeTaskStatusBox" class="text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 p-3 rounded-lg">
+            جاري فحص المشروع السحابي...
+          </div>
+        </div>
+
+        <!-- نشر مشروع جديد -->
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <h4 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+            <span>📢</span> نشر وتعيين مشروع جديد للطالبات
+          </h4>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">الصف المستهدف :</label>
+              <select id="teacherTargetClassSelect" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-800">
+                <option value="all">جميع الصفوف (العاشر)</option>
+                <option value="10-1">فصل 10-1</option>
+                <option value="10-2">فصل 10-2</option>
+                <option value="10-3">فصل 10-3</option>
+                <option value="10-4">فصل 10-4</option>
+                <option value="10-5">فصل 10-5</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">عنوان المشروع :</label>
+              <input type="text" id="teacherTaskTitleInput" placeholder="مثال: مشروع بايثون النهائي" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-semibold text-slate-800">
+            </div>
+          </div>
+
+          <div class="mb-3 p-3 bg-slate-50 border border-dashed border-slate-300 rounded-lg">
+            <label class="block text-xs font-bold text-slate-700 mb-1">📁 رفع ملفات بايثون متعددة (.py) للمشروع:</label>
+            <input type="file" id="teacherMultipleFilesInput" multiple accept=".py" class="text-xs text-slate-600">
+            <div id="uploadedFilesListBadge" class="mt-2 flex flex-wrap gap-1.5"></div>
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-xs font-bold text-slate-600 mb-1">كود بايثون التوجيهي أو تعليمات المشروع :</label>
+            <textarea id="teacherTaskCodeInput" rows="3" placeholder="# اكتبي هنا الكود التوجيهي أو متطلبات المشروع..." class="w-full bg-slate-900 text-slate-100 font-mono text-xs p-3 rounded-lg leading-relaxed outline-none"></textarea>
+          </div>
+
+          <button id="publishTaskToCloudBtn" class="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-bold px-5 py-2.5 rounded-lg text-xs shadow-md transition-all flex items-center gap-2">
+            <span>☁️</span> نشر وإرسال المشروع لطالبات الصف المحدد
+          </button>
+        </div>
+
+        <!-- إضافة وإدارة التدريبات الإضافية -->
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <h4 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-1.5">
+            <span>💡</span> إدارة وحذف التدريبات الإضافية المنشورة للطالبات
+          </h4>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div class="text-xs font-bold text-slate-700 mb-1">إضافة تدريب إضافي جديد:</div>
+              <input type="text" id="newPracticeTitleInput" placeholder="عنوان التدريب (مثال: تدريب 6 - صححي الخطأ)" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-semibold">
+              <input type="text" id="newPracticeTaskInput" placeholder="المطلوب من الطالبة..." class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs">
+              <textarea id="newPracticeCodeInput" rows="2" placeholder="# كود التدريب مع الملاحظات..." class="w-full bg-slate-900 text-slate-100 font-mono text-xs p-2 rounded-lg outline-none"></textarea>
+              <button id="addNewPracticeBtn" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition-all">
+                + إضافة للتدريبات الإضافية
+              </button>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div class="text-xs font-bold text-slate-700 mb-2">التدريبات الإضافية الحالية:</div>
+              <div id="practicesManagementList" class="space-y-1.5 max-h-44 overflow-y-auto pr-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- إضافة وإدارة حلول أوراق العمل -->
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <h4 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-1.5">
+            <span>📖</span> إدارة حلول أوراق العمل النموذجية (للاطلاع)
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div class="text-xs font-bold text-slate-700 mb-1">إضافة حل ورقة عمل جديدة:</div>
+              <input type="text" id="newSolutionTitleInput" placeholder="عنوان ورقة العمل" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-semibold">
+              <textarea id="newSolutionCodeInput" rows="3" placeholder="# كود الحل النموذجي..." class="w-full bg-slate-900 text-slate-100 font-mono text-xs p-2 rounded-lg outline-none"></textarea>
+              <button id="addNewSolutionBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition-all">
+                + إضافة لحلول أوراق العمل
+              </button>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div class="text-xs font-bold text-slate-700 mb-2">حلول أوراق العمل المتاحة:</div>
+              <div id="solutionsManagementList" class="space-y-1.5 max-h-44 overflow-y-auto pr-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- جدول تسليمات الطالبات -->
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <div class="flex items-center gap-3">
+              <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                <span>📥</span> تسليمات وحلول مشاريع الطالبات المستلمة
+              </h4>
+              <div class="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200">
+                <span class="text-xs font-bold text-slate-600">تصنيف حسب الصف:</span>
+                <select id="teacherClassFilterSelect" class="bg-white border border-slate-300 rounded px-2 py-0.5 text-xs font-bold text-indigo-700 outline-none">
+                  <option value="all">كافة الصفوف</option>
+                  <option value="10-1">فصل 10-1</option>
+                  <option value="10-2">فصل 10-2</option>
+                  <option value="10-3">فصل 10-3</option>
+                  <option value="10-4">فصل 10-4</option>
+                  <option value="10-5">فصل 10-5</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button id="exportExcelBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow-sm transition-all">
+                <span>📊</span> تصدير إكسيل (Excel)
+              </button>
+              <button id="clearSubmissionsBtn" class="text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all">
+                🗑 مسح الكل
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto max-h-60 border border-slate-200 rounded-lg">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="p-2.5">اسم الطالبة</th>
+                  <th class="p-2.5">الصف</th>
+                  <th class="p-2.5">النشاط</th>
+                  <th class="p-2.5">وقت التسليم</th>
+                  <th class="p-2.5 text-center">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="submissionsTableBody" class="divide-y divide-slate-100 text-slate-800">
+                <tr>
+                  <td colspan="5" class="p-4 text-center text-slate-400">لا توجد تسليمات جديدة حتى الآن.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== JavaScript البرمجي ==================== -->
+  <script>
+    const STUDENTS_DATABASE = {
+      "10-1": [
+        "العنود طلال محمد الهاجرى", "امنه ناصر غلوم حسن", "ايات امير شاكر بارون", "بتول هشام احمد عبدالله",
+        "حوراء شاكر محمود عبدالكريم", "حوراء ناصر عبدالمحسن ابراهيم", "حوراء ناصر كاظم المتروك", "دانة عيسى محمد البلوشي",
+        "ريتاج سامي احمد الشايجي", "زينب صالح مهدي دشتي", "زينب عيسى حميد علي", "ساره علي عبد الرسول ليري",
+        "سكينه خالد ابراهيم مظفر", "صبا سعد ابراهيم الحوطي", "طيبه علي اسماعيل محمد باقر", "فاطمة احمد عيسي غلوم",
+        "فاطمة حسين علي المحميد", "فاطمة عماد عبدالجبار العبدالجبار", "فاطمة فريد عبدالله مبارك", "فاطمه ابراهيم اسماعيل حيدر",
+        "فاطمه خالد احمد الفيلكاوي", "فاطمه شاكر عبد الصمد بوحمد", "فاطمه عباس ابراهيم اسماعيل", "فاطمه عدنان حسين رجب",
+        "فاطمه علي حسن القطان", "فاطمه علي حسين ميرزا", "فضه جاسم محمد بوقريص", "كوثر علي احمد دشتي",
+        "لجين مشاري عبدالله الصراف", "مريم خالد عبد الرسول بو عباس", "مريم علي حسين باقر", "منار عادل محمد الحبابي",
+        "نرجس احمد حسن حيدر"
+      ],
+      "10-2": [
+        "اسيل عبدالكريم جاسم العبدالكريم", "العنود سعود فالح الشبعان", "انوار بدر راشد حيدر", "بتول علي حسين رجب",
+        "بشاير بدر حميد كنعان", "بنين عبدالهادي عبدالحميد الصفار", "جنان يعقوب يوسف شمساه", "حوراء حسين علي ابراهيم",
+        "دلال عثمان احمد الصالح", "ديما جابر محمد الهاجرى", "رتاج محمد حمزه علي", "رقيه ابراهيم محمد بوشهري",
+        "روان محمد غلوم حسن", "ريتاج يوسف خليل سالمين", "زينب حسين كاظم بوعباس", "زينب علي عبد الرسول الوزان",
+        "زينب كاظم علي بوعباس", "ساره ناصر احمد التميمي", "سندس عبدالعزيز حسن السالم", "طيبه علي فيصل القطان",
+        "عائشه فيصل محمد الكندري", "غلا عبدالله حسين بارون", "فاطمة عباس محمد علي", "فاطمة مصطفى محمد العلي",
+        "فاطمه الزهراء علي حيدر بخش", "فاطمه حسين ابراهيم الوزان", "فاطمه حسين عيسى حيدر", "فاطمه حسين ناصر بوعباس",
+        "فاطمه سامي صالح الصراف", "فاطمه علي ناصر مظفر", "فاطمه فيصل فاضل الجزاف", "فاطمه مجيد عبد الرسول القطان",
+        "فاطمه محمد جاسم احمد الشراح", "فاطمه هاني بدر البلوشي", "فرح احمد بدر الحداد", "فضه جاسم عيسى الوزان",
+        "كوثر اسامه عبدالله الوزان", "لجين حسن فاضل دشتي", "لولوه سامي عبدالمحسن البابطين", "مروه ماجد يوسف بوعباس",
+        "مريم احمد حسن كمال", "نور علي جاسم عبدالله الصفار"
+      ],
+      "10-3": [
+        "ابرار وليد جاسم التميمي", "ارجوان حسين علي دشتي", "اسيل احمد عبدالرسول معرفي", "امنه حسين غلوم قاسم حسن غلوم",
+        "امينه خليل جاسم بارون", "ايات باسم مصطفى الرامزى", "ايات حسين حمزه عريان", "بتول مصطفى سيد على كمالي",
+        "بتول مهدي صالح باقر", "جنى علي خليل اشكناني", "حوراء حمزه عباس خاجه", "حوراء يوسف يعقوب الفهد",
+        "خديجه فاضل عباس الجزاف", "دانه خالد جاسم الخليفي", "دلال عبدالمحسن حسين معرفي", "رتاج يعقوب يوسف ليري",
+        "رقيه محمد مجيد كاكولي", "ريتاج فيصل غلوم علي محمد", "زهراء حيدر خليل ابل", "زهراء عبدالمجيد محمد الصراف",
+        "زينب احمد غلوم حسن", "زينب حمزه عباس دشتي", "زينب رياض عيسى القطان", "زينب عبدالعزيز محمد حسن",
+        "زينب عبدالمحسن عبدالمجيد البغلي", "زينب فاضل كاظم القلاف", "زينب محمد جاسم حسين", "زينب محمود حسين غلوم",
+        "زينب يحيى عبدالمحسن العطار", "ساره جاسم محمد كمال", "سكينه احمد عبد الرضا كابلي", "شهد عماد احمد السالم",
+        "غدير عبدالكريم اسماعيل مندني", "فاطمه احمد عاشور خورشيد", "فاطمه بدر مبارك مبارك", "فاطمه حسن حاجي اشكناني",
+        "فاطمه حسين ابراهيم معرفي", "فاطمه حسين محمد حسين كمال", "فاطمه سالم حسن اشكناني", "فاطمه عباس فاضل الصباغ",
+        "فاطمه فيصل كاظم القلاف", "فاطمه محمد احمد القلاف", "فاطمه يعقوب يوسف دشتي", "فاطمه يوسف حسين اشكناني",
+        "فجر مبارك هجاج العازمي", "فرح انور حسين القطان", "كوثر حسين رجب علي", "كوثر صادق جعفر ابراهيم الحداد",
+        "لجين جاسم محمد علي", "مريم جواد محمد بوشهري", "مريم نادر حسين قاسم", "معالي فواز عايد الرشيدي",
+        "مناير احمد صالح الصراف", "نرجس عيسى احمد دشتي", "نور عماد احمد الشايجي"
+      ],
+      "10-4": [
+        "أسيل نايف بشير عوض بشير الشمري", "اميرة اسامه جوهر العنزى", "بينه سعد مبارك سعيد الهاجرى", "جميله فيصل راشد المري",
+        "جوري عبدالله ناصر خالص عبدالله مهيلان", "حنان سعيد ابراهيم العيسى", "رغد", "ريماس عبدالكريم ظاهر صالح السعدون",
+        "زينب جعفر احمد حسين", "ساره سعود بداح علوش سعود ن المطيري", "ساره محمد سعد العجمي", "سجى محمد ناصر الحارث",
+        "شهد محمد حثلان السبيعي", "شوق نادر فالح القحطاني", "عائشه عبدالرحمن سعد الحمد", "غدير احمد محمد علي صالح",
+        "غلا سالم ناصر سعد شبيب العجمي", "فاطمه الحوراء عبدالرضا جاسم محمد علي دشتي", "فاطمه صالح خلف القلاف",
+        "فوز فهاد نصار سالم بصيرات العازمي", "ليال نايف عبدالله دهام", "مريم حسن محمد علي احمد", "مريم محسن مطر العنزي",
+        "منيره فواز فيصل الهدب", "نادية قتاده عبدالرحمن الميعان", "نوره محمد علي فرس", "وفاء سليمان عبد الرزاق ظاهر"
+      ],
+      "10-5": [
+        "العنود يعقوب يوسف حسن", "امنه علي حسين الكندري", "ايات محمود عبدالله علي", "بتول جاسم محمد الوزان",
+        "بتول صلاح بدر القطان", "بتول علي عباس علي الصالح", "بتول ناصر جاسم القلاف", "بنين محمد عبد المحسن حيدر",
+        "جنان يعقوب يوسف المحميد", "جود مبارك عيسى النعيمي", "حوراء احمد ابراهيم الشطي", "حوراء احمد عبد الرسول معرفي",
+        "حوراء جميل احمد ملا يوسف", "حوراء نوري حيدر القطان", "دلال وليد احمد الفهد", "رتاج عادل خليل بوعباس",
+        "رتاج عدنان مكي جمعه", "رتاج محمد حمزه كاكولي", "رقيه احمد عبدالكريم مظفر", "ريتاج سامي صالح المتروك",
+        "زينب باسل احمد غلوم", "زينب جاسم محمد القطان", "زينب جواد علي البلوشي", "زينب سمير غلوم محمد",
+        "زينب عبدالله جاسم الشطي", "زينب فيصل حبيب دشتي", "زينب مهدي عبدالمحسن شهاب", "ساره احمد عبد المحسن الصايغ",
+        "ساره عبد الرزاق عبد المجيد فرج", "سكينه علي حسن احمد", "صبا بدر يوسف الشراح", "طيبه علي شاكر البلوشي",
+        "فاطمة الزهراء احمد طاهر بوحمد", "فاطمة علي ناصر بوعباس", "فاطمه الزهراء عبدالله حسين القطان", "فاطمه جابر جواد علي حيدر",
+        "فاطمه جاسم محمد احمد الصراف", "فاطمه خالد عبدالجليل بن حيدر", "فاطمه خليل ابراهيم الصالح", "فاطمه عبد الجليل علي محمد",
+        "فاطمه علي حسن ملا علي", "فاطمه علي حسين الشواف", "فاطمه عماد عبد الصمد دشتي", "فاطمه فؤاد علي مظفر",
+        "فاطمه يوسف احمد الصفار", "كوثر علي ناصر معرفي", "كوثر محمد عيسى حسن", "مريم جاسم محمد القطان",
+        "مريم حسن عباس ميرزا", "مريم عبدالجليل حسين كمال", "مريم عمار محمد الكندري", "نور علي ناصر البلوشي",
+        "هاجر محمد عباس بخش", "يثرب يعقوب يوسف الفهد"
+      ]
+    };
+
+    let PRACTICES_DATA = [
+      {
+        id: "p1",
+        title: "تدريب (1) - أكملي التعليمة: الطباعة print",
+        task: "أكملي التعليمة البرمجية لطباعة العبارة الترحيبية على الشاشة.",
+        code: `# تدريب (1): أكملي التعليمة البرمجية\n# المطلوب: استبدلي علامات الاستفهام ??? بالدالة المناسبة لطباعة النص\n???("مرحباً بك في لغة بايثون")\n`,
+        verify: (code, out) => code.includes("print") && out.includes("مرحباً بك في لغة بايثون")
+      },
+      {
+        id: "p2",
+        title: "تدريب (2) - صححي الخطأ: علامات التنصيص",
+        task: "اكتشفي الخطأ في طباعة اسم مدرستكِ وصححيه.",
+        code: `# تدريب (2): صححي الخطأ البرمجي (Syntax Error)\n# الكود التالي يسبب خطأ بسبب علامات التنصيص\nprint(ثانوية موضي سلطان العيسى)\n`,
+        verify: (code, out) => (code.includes('"ثانوية موضي سلطان العيسى"') || code.includes("'ثانوية موضي سلطان العيسى'")) && out.includes("ثانوية موضي سلطان العيسى")
+      },
+      {
+        id: "p3",
+        title: "تدريب (3) - أكملي التعليمة: دالة الإدخال input",
+        task: "أكملي التعليمة لاستقبال اسم الطالبة من لوحة المفاتيح وتخزينه.",
+        code: `# تدريب (3): أكملي التعليمة البرمجية\n# المطلوب: استبدلي ??? بدالة الإدخال الصحيحة\nname = ???("ما اسمكِ يا متميزة؟ ")\nprint("أهلاً بكِ يا", name)\n`,
+        verify: (code, out) => code.includes("input")
+      },
+      {
+        id: "p4",
+        title: "تدريب (4) - صححي الخطأ: الشرط if ونقطتا الرأسين",
+        task: "صححي الخطأ في جملة if لتحديد حالة الطالبة الناجحة.",
+        code: `# تدريب (4): صححي الخطأ البرمجي\ngrade = 85\nif grade >= 50\n    print("ناجحة، مبارك التميز!")\n`,
+        verify: (code, out) => code.includes("if grade >= 50:") && out.includes("ناجحة")
+      },
+      {
+        id: "p5",
+        title: "تدريب (5) - أكملي التعليمة: التكرار for و range",
+        task: "أكملي التعليمة لتكرار طباعة الأرقام من 1 إلى 5.",
+        code: `# تدريب (5): أكملي التعليمة البرمجية\nfor i in ???(1, 6):\n    print("العدد:", i)\n`,
+        verify: (code, out) => code.includes("range(1, 6)") || code.includes("range(1,6)")
+      }
+    ];
+
+    let WORKSHEET_SOLUTIONS = [
+      {
+        id: "ws6",
+        title: "حل ورقة عمل (6) - العمليات الحسابية والطباعة",
+        code: `# حل ورقة عمل (6) المعتمد\nnum1 = 15\nnum2 = 5\nprint("حاصل الجمع:", num1 + num2)\nprint("حاصل الطرح:", num1 - num2)\nprint("حاصل الضرب:", num1 * num2)\nprint("حاصل القسمة:", num1 / num2)\n`
+      },
+      {
+        id: "ws7",
+        title: "حل ورقة عمل (7) - دالة الإدخال والتحويل العددي",
+        code: `# حل ورقة عمل (7) المعتمد\nname = input("أدخلي اسم الطالبة: ")\nscore = float(input("أدخلي درجة الاختبار: "))\nprint("الطالبة:", name, "حصلت على:", score)\n`
+      },
+      {
+        id: "ws8",
+        title: "حل ورقة عمل (8) - المعاملات الشرطية if - else",
+        code: `# حل ورقة عمل (8) المعتمد\nage = int(input("أدخلي عمركِ: "))\nif age >= 16:\n    print("مؤهلة للمشاركة في المشروع")\nelse:\n    print("نرحب بكِ في العام القادم")\n`
+      }
+    ];
+
+    let currentUser = null;
+    let editor = null;
+    let pyodideInstance = null;
+    let isPyodideReady = false;
+    let currentActiveExercise = null;
+    let currentTaskCloudData = null;
+    let inputResolveCallback = null;
+    let currentUploadedFiles = [];
+    let currentRawSubmissions = {};
+    let currentSelectedFilterClass = "all";
+    let rtdb = null;
+
+    // لا يوجد كود افتراضي مبدئي لتبدأ الطالبة بصفحة نظيفة تماماً
+    const INITIAL_CODE = "";
+
+    // قائمة دوال السلاسل النصية وميثودز بايثون الشائعة للإكمال التلقائي الذكي
+    const PYTHON_STRING_METHODS = [
+      { text: "upper()", displayText: "upper() - تحويل لكبير" },
+      { text: "lower()", displayText: "lower() - تحويل لصغير" },
+      { text: "capitalize()", displayText: "capitalize() - تكبير الحرف الأول" },
+      { text: "title()", displayText: "title() - تكبير أول كل كلمة" },
+      { text: "strip()", displayText: "strip() - مسح المسافات" },
+      { text: "split()", displayText: "split() - تقطيع النص لقائمة" },
+      { text: "replace()", displayText: "replace(old, new) - استبدال" },
+      { text: "find()", displayText: "find(sub) - البحث عن موقع" },
+      { text: "count()", displayText: "count(sub) - عدد التكرار" },
+      { text: "isdigit()", displayText: "isdigit() - هل أرقام فقط؟" },
+      { text: "isalpha()", displayText: "isalpha() - هل حروف فقط؟" },
+      { text: "startswith()", displayText: "startswith(sub) - يبدأ بـ" },
+      { text: "endswith()", displayText: "endswith(sub) - ينتهي بـ" },
+      { text: "join()", displayText: "join(iterable) - دمج" },
+      { text: "format()", displayText: "format(...) - تنسيق النص" }
+    ];
+
+    // تبدأ شاشة الطالبة فارغة تماماً دون أي ملفات مفتوحة مسبقاً
+    let openFiles = [];
+    let currentActiveFileName = "";
+
+    // دالة تنظيف وتصحيح أكواد بايثون القادمة من ملفات المعلمة أو السحابة
+    function sanitizePythonCode(rawCode) {
+      if (!rawCode) return "";
+      return rawCode
+        // توحيد فواصل الأسطر من أنظمة ويندوز
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        // استبدال علامات التنصيص الذكية المائلة (من الوورد أو البوربوينت) بعلامات تنصيص بايثون القياسية
+        .replace(/[\u201C\u201D\u201E\u201F\u00AB\u00BB]/g, '"')
+        .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+        // استبدال المسافات غير المرئية والـ Non-breaking spaces
+        .replace(/[\u00A0\u2000-\u200B\u202F\u205F]/g, " ")
+        .trimEnd();
+    }
+
+    try {
+      if (typeof firebase !== 'undefined') {
+        const firebaseConfig = {
+          databaseURL: "https://python-answers-default-rtdb.firebaseio.com/"
+        };
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        rtdb = firebase.database();
+      }
+    } catch (err) {
+      console.warn("Firebase Init notice:", err);
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      initEditor();
+      setupEventListeners();
+      renderEditorTabs();
+      checkUrlRoleOrSession();
+      listenToCloudTaskUpdates();
+      listenToCloudSubmissions();
+      renderPracticesManagementList();
+      renderSolutionsManagementList();
+      await initPyodide();
+    });
+
+    function initEditor() {
+      const area = document.getElementById("codeEditorArea");
+      editor = CodeMirror.fromTextArea(area, {
+        mode: "python",
+        theme: "eclipse",
+        lineNumbers: true,
+        indentUnit: 4,
+        tabSize: 4,
+        indentWithTabs: false,
+        lineWrapping: true,
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        direction: "ltr",
+        extraKeys: {
+          "Ctrl-Space": "autocomplete"
+        }
+      });
+
+      // تفعيل الإكمال التلقائي الذكي بمجرد كتابة النقطة (.)
+      editor.on("inputRead", (cm, change) => {
+        if (change.text[0] === ".") {
+          CodeMirror.showHint(cm, pythonMethodHint, { completeSingle: false });
+        }
+      });
+
+      editor.setValue("");
+      editor.on("change", () => {
+        const file = openFiles.find(f => f.name === currentActiveFileName);
+        if (file) {
+          file.content = editor.getValue();
+        }
+      });
+      setTimeout(() => editor.refresh(), 200);
+    }
+
+    // مزود الإكمال التلقائي لدوال بايثون
+    function pythonMethodHint(cm) {
+      const cursor = cm.getCursor();
+      const line = cm.getLine(cursor.line);
+      const start = cursor.ch;
+      const end = cursor.ch;
+
+      return {
+        list: PYTHON_STRING_METHODS,
+        from: CodeMirror.Pos(cursor.line, start),
+        to: CodeMirror.Pos(cursor.line, end)
+      };
+    }
+
+    // إدارة تبويبات الملفات
+    function renderEditorTabs() {
+      const tabsBar = document.getElementById("editorTabsContainer");
+      if (!tabsBar) return;
+      tabsBar.innerHTML = "";
+
+      if (openFiles.length === 0) {
+        tabsBar.innerHTML = `<span class="text-xs text-slate-500 py-1 px-2 italic">لا يوجد ملف مفتوح حالياً. اضغطي على زر [➕ ملف جديد] للبدء.</span>`;
+        document.getElementById("activeFileNameBadge").textContent = "لا يوجد ملف";
+        if (editor) {
+          editor.setValue("");
+          editor.setOption("readOnly", "nocursor");
+        }
+        return;
+      }
+
+      if (editor && editor.getOption("readOnly")) {
+        editor.setOption("readOnly", false);
+      }
+
+      openFiles.forEach(file => {
+        const isActive = file.name === currentActiveFileName;
+        const tab = document.createElement("div");
+        tab.className = `flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-bold rounded-t border-t border-x cursor-pointer transition-all ${
+          isActive
+            ? "bg-white text-blue-600 border-slate-300 shadow-sm"
+            : "bg-slate-100 text-slate-600 border-transparent hover:bg-slate-50"
+        }`;
+        
+        tab.innerHTML = `
+          <span>🐍 ${file.name}</span>
+          <span class="close-file-tab hover:text-rose-600 font-bold ml-1" title="إغلاق الملف">&times;</span>
+        `;
+
+        tab.addEventListener("click", (e) => {
+          if (e.target.classList.contains("close-file-tab")) return;
+          switchToFile(file.name);
+        });
+
+        const closeBtn = tab.querySelector(".close-file-tab");
+        if (closeBtn) {
+          closeBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            closeFile(file.name);
+          });
+        }
+
+        tabsBar.appendChild(tab);
+      });
+
+      document.getElementById("activeFileNameBadge").textContent = currentActiveFileName;
+    }
+
+    function switchToFile(fileName) {
+      const current = openFiles.find(f => f.name === currentActiveFileName);
+      if (current && editor) {
+        current.content = editor.getValue();
+      }
+
+      const target = openFiles.find(f => f.name === fileName);
+      if (target) {
+        currentActiveFileName = target.name;
+        editor.setValue(target.content);
+        renderEditorTabs();
+      }
+    }
+
+    function createNewStudentFile() {
+      const current = openFiles.find(f => f.name === currentActiveFileName);
+      if (current && editor) {
+        current.content = editor.getValue();
+      }
+
+      let fileIndex = openFiles.length + 1;
+      let defaultName = `task_${fileIndex}.py`;
+      
+      const customName = prompt("أدخلي اسم الملف الجديد (ينتهي بـ .py):", defaultName);
+      if (!customName) return;
+
+      let cleanName = customName.trim();
+      if (!cleanName.endsWith(".py")) {
+        cleanName += ".py";
+      }
+
+      if (openFiles.some(f => f.name === cleanName)) {
+        alert("يوجد ملف بهذا الاسم بالفعل!");
+        return;
+      }
+
+      const initialText = "";
+      openFiles.push({ name: cleanName, content: initialText });
+      currentActiveFileName = cleanName;
+      if (editor) {
+        editor.setOption("readOnly", false);
+        editor.setValue(initialText);
+      }
+      renderEditorTabs();
+      editor.focus();
+      clearConsole();
+      appendConsoleOutput(`// تم إنشاء وفتح الملف: ${cleanName}`, "#6aab73");
+    }
+
+    function closeFile(fileName) {
+      const idx = openFiles.findIndex(f => f.name === fileName);
+      if (idx !== -1) {
+        openFiles.splice(idx, 1);
+        if (openFiles.length === 0) {
+          currentActiveFileName = "";
+          if (editor) editor.setValue("");
+        } else if (currentActiveFileName === fileName) {
+          currentActiveFileName = openFiles[Math.max(0, idx - 1)].name;
+          editor.setValue(openFiles.find(f => f.name === currentActiveFileName).content);
+        }
+        renderEditorTabs();
+      }
+    }
+
+    async function initPyodide() {
+      const statusBadge = document.getElementById("engineStatusBadge");
+      const dot = document.getElementById("consoleIndicatorDot");
+      try {
+        pyodideInstance = await loadPyodide({
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+        });
+        isPyodideReady = true;
+        statusBadge.textContent = "بيئة بايثون جاهزة للعمل";
+        statusBadge.className = "text-[11px] text-emerald-400 font-bold";
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+      } catch (e) {
+        statusBadge.textContent = "يعمل بالوضع الاحتياطي";
+      }
+    }
+
+    function checkUrlRoleOrSession() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("role") === "teacher") {
+        document.getElementById("openTeacherDashboardDirectBtn").classList.remove("hidden");
+      }
+      const saved = localStorage.getItem("modhi_python_session");
+      if (saved) {
+        try {
+          setCurrentUser(JSON.parse(saved));
+          return;
+        } catch (e) {}
+      }
+      showLoginModal();
+    }
+
+    function setCurrentUser(user) {
+      currentUser = user;
+      localStorage.setItem("modhi_python_session", JSON.stringify(user));
+      const badge = document.getElementById("currentUserBadge");
+      const nameText = document.getElementById("currentUserNameText");
+      const loginBtn = document.getElementById("showLoginModalBtn");
+      const teacherBtn = document.getElementById("openTeacherDashboardDirectBtn");
+
+      if (user.role === "teacher") {
+        nameText.textContent = "👩‍🏫 أ. وفاء عليان (معلمة المادة)";
+        teacherBtn.classList.remove("hidden");
+        document.getElementById("exportCodeBtn").classList.remove("hidden");
+      } else {
+        nameText.textContent = `🎓 ${user.name} (${user.class})`;
+        teacherBtn.classList.add("hidden");
+        document.getElementById("exportCodeBtn").classList.add("hidden");
+        // التأكد من تصفير وتفريغ الملفات لشاشة الطالبة
+        openFiles = [];
+        currentActiveFileName = "";
+        if (editor) {
+          editor.setValue("");
+          editor.setOption("readOnly", "nocursor");
+        }
+        renderEditorTabs();
+      }
+      badge.classList.remove("hidden");
+      badge.classList.add("flex");
+      loginBtn.classList.add("hidden");
+      hideLoginModal();
+    }
+
+    function logout() {
+      currentUser = null;
+      openFiles = [];
+      currentActiveFileName = "";
+      if (editor) {
+        editor.setValue("");
+        editor.setOption("readOnly", "nocursor");
+      }
+      renderEditorTabs();
+      localStorage.removeItem("modhi_python_session");
+      document.getElementById("currentUserBadge").classList.add("hidden");
+      document.getElementById("currentUserBadge").classList.remove("flex");
+      document.getElementById("showLoginModalBtn").classList.remove("hidden");
+      document.getElementById("submitToTeacherBtn").classList.add("hidden");
+      document.getElementById("checkSolutionBtn").classList.add("hidden");
+      showLoginModal();
+    }
+
+    function showLoginModal() {
+      document.getElementById("loginModalOverlay").classList.remove("hidden");
+      document.getElementById("loginModalOverlay").classList.add("flex");
+    }
+    function hideLoginModal() {
+      document.getElementById("loginModalOverlay").classList.add("hidden");
+      document.getElementById("loginModalOverlay").classList.remove("flex");
+    }
+
+    function setupEventListeners() {
+      const tabStudent = document.getElementById("tabStudentBtn");
+      const tabTeacher = document.getElementById("tabTeacherBtn");
+      const secStudent = document.getElementById("studentLoginSection");
+      const secTeacher = document.getElementById("teacherLoginSection");
+
+      tabStudent.addEventListener("click", () => {
+        tabStudent.className = "flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-all";
+        tabTeacher.className = "flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-800 transition-all";
+        secStudent.classList.remove("hidden");
+        secTeacher.classList.add("hidden");
+      });
+
+      tabTeacher.addEventListener("click", () => {
+        tabTeacher.className = "flex-1 py-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-all";
+        tabStudent.className = "flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-800 transition-all";
+        secTeacher.classList.remove("hidden");
+        secStudent.classList.add("hidden");
+      });
+
+      const classSelect = document.getElementById("modalClassSelect");
+      const studentSelect = document.getElementById("modalStudentSelect");
+      classSelect.addEventListener("change", (e) => {
+        const cls = e.target.value;
+        studentSelect.innerHTML = "";
+        if (!cls || !STUDENTS_DATABASE[cls]) {
+          studentSelect.disabled = true;
+          studentSelect.className = "w-full bg-slate-100 border border-slate-300 rounded-lg p-2.5 text-sm font-semibold text-slate-800 outline-none";
+          const def = document.createElement("option");
+          def.value = "";
+          def.textContent = "-- حددي الصف لتظهر الأسماء --";
+          studentSelect.appendChild(def);
+          return;
+        }
+
+        studentSelect.disabled = false;
+        studentSelect.className = "w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm font-semibold text-slate-800 outline-none";
+        const def = document.createElement("option");
+        def.value = "";
+        def.textContent = "-- اختاري اسمكِ المعتمد --";
+        studentSelect.appendChild(def);
+
+        STUDENTS_DATABASE[cls].forEach(name => {
+          const opt = document.createElement("option");
+          opt.value = name;
+          opt.textContent = name;
+          studentSelect.appendChild(opt);
+        });
+      });
+
+      document.getElementById("confirmStudentLoginBtn").addEventListener("click", () => {
+        const cls = classSelect.value;
+        const name = studentSelect.value;
+        const err = document.getElementById("studentLoginError");
+        if (!cls || !name) {
+          err.textContent = "الرجاء اختيار الصف ثم اختيار اسمكِ المعتمد.";
+          err.classList.remove("hidden");
+          return;
+        }
+        err.classList.add("hidden");
+        setCurrentUser({ name, class: cls, role: "student" });
+      });
+
+      document.getElementById("confirmTeacherLoginBtn").addEventListener("click", () => {
+        const pwd = document.getElementById("modalTeacherPasswordInput").value;
+        const err = document.getElementById("teacherLoginError");
+        if (pwd === "P@ssw0rd-python") {
+          err.classList.add("hidden");
+          document.getElementById("modalTeacherPasswordInput").value = "";
+          setCurrentUser({ name: "أ. وفاء عليان", class: "معلمة", role: "teacher" });
+          openTeacherDashboard();
+        } else {
+          err.textContent = "كلمة المرور غير صحيحة، يرجى المحاولة مرة أخرى.";
+          err.classList.remove("hidden");
+        }
+      });
+
+      document.getElementById("teacherClassFilterSelect").addEventListener("change", (e) => {
+        currentSelectedFilterClass = e.target.value;
+        renderSubmissionsTable(currentRawSubmissions);
+      });
+
+      const multipleFileInput = document.getElementById("teacherMultipleFilesInput");
+      const filesBadge = document.getElementById("uploadedFilesListBadge");
+      if (multipleFileInput) {
+        multipleFileInput.addEventListener("change", async (e) => {
+          currentUploadedFiles = [];
+          filesBadge.innerHTML = "";
+          const files = Array.from(e.target.files);
+          for (let f of files) {
+            const content = await f.text();
+            currentUploadedFiles.push({ name: f.name, content: content });
+            const chip = document.createElement("span");
+            chip.className = "bg-indigo-100 text-indigo-800 text-[11px] font-mono font-bold px-2 py-0.5 rounded";
+            chip.textContent = `📄 ${f.name}`;
+            filesBadge.appendChild(chip);
+          }
+        });
+      }
+
+      document.getElementById("addNewSolutionBtn").addEventListener("click", () => {
+        const title = document.getElementById("newSolutionTitleInput").value.trim();
+        const code = document.getElementById("newSolutionCodeInput").value;
+        if (!title || !code) {
+          alert("الرجاء إدخال عنوان ورقة العمل وكود الحل.");
+          return;
+        }
+        WORKSHEET_SOLUTIONS.push({ id: `ws_custom_${Date.now()}`, title, code });
+        alert("تمت إضافة حل ورقة العمل بنجاح ✅");
+        document.getElementById("newSolutionTitleInput").value = "";
+        document.getElementById("newSolutionCodeInput").value = "";
+        renderSolutionsManagementList();
+      });
+
+      document.getElementById("addNewPracticeBtn").addEventListener("click", () => {
+        const title = document.getElementById("newPracticeTitleInput").value.trim();
+        const task = document.getElementById("newPracticeTaskInput").value.trim();
+        const code = document.getElementById("newPracticeCodeInput").value;
+        if (!title || !code) {
+          alert("الرجاء إدخال عنوان التدريب وكود بايثون.");
+          return;
+        }
+        PRACTICES_DATA.push({
+          id: `p_custom_${Date.now()}`,
+          title,
+          task: task || "تدريب عملي إضافي",
+          code,
+          verify: (c, out) => out.length > 0
+        });
+        alert("تمت إضافة التدريب الإضافي بنجاح ✅");
+        document.getElementById("newPracticeTitleInput").value = "";
+        document.getElementById("newPracticeTaskInput").value = "";
+        document.getElementById("newPracticeCodeInput").value = "";
+        renderPracticesManagementList();
+      });
+
+      document.getElementById("exportExcelBtn").addEventListener("click", exportSubmissionsToExcel);
+      document.getElementById("logoutBtn").addEventListener("click", logout);
+      document.getElementById("showLoginModalBtn").addEventListener("click", showLoginModal);
+      document.getElementById("schoolLogoTrigger").addEventListener("click", () => {
+        if (currentUser && currentUser.role === "teacher") {
+          openTeacherDashboard();
+        } else {
+          showLoginModal();
+          tabTeacher.click();
+        }
+      });
+      document.getElementById("openTeacherDashboardDirectBtn").addEventListener("click", openTeacherDashboard);
+
+      document.getElementById("closeTeacherDashboardBtn").addEventListener("click", () => {
+        document.getElementById("teacherDashboardModal").classList.add("hidden");
+        document.getElementById("teacherDashboardModal").classList.remove("flex");
+      });
+
+      document.getElementById("runCodeBtn").addEventListener("click", executeCurrentCode);
+      document.getElementById("checkSolutionBtn").addEventListener("click", verifyStudentSolution);
+      document.getElementById("submitToTeacherBtn").addEventListener("click", submitWorkToTeacher);
+
+      document.getElementById("openPracticesBtn").addEventListener("click", openPracticesDrawer);
+      document.getElementById("openSolutionsBtn").addEventListener("click", openSolutionsDrawer);
+      document.getElementById("openProjectBtn").addEventListener("click", openProjectDrawer);
+      document.getElementById("closeDrawerBtn").addEventListener("click", closeDrawer);
+
+      document.getElementById("publishTaskToCloudBtn").addEventListener("click", publishTaskFromTeacher);
+      document.getElementById("cancelCurrentTaskBtn").addEventListener("click", cancelCurrentTask);
+      document.getElementById("clearSubmissionsBtn").addEventListener("click", clearSubmissionsList);
+
+      // زر مسح المحرر
+      document.getElementById("clearEditorBtn").addEventListener("click", () => {
+        editor.setValue("");
+        editor.focus();
+      });
+
+      // زر إنشاء ملف جديد
+      document.getElementById("createNewFileBtn").addEventListener("click", createNewStudentFile);
+
+      document.getElementById("exportCodeBtn").addEventListener("click", () => {
+        const code = editor.getValue();
+        const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = document.getElementById("activeFileNameBadge").textContent.trim() || "script.py";
+        a.click();
+      });
+
+      // التعامل مع الإدخال المباشر داخل الكونسول عند ضغط زر Enter
+      document.getElementById("consoleInlineInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          const val = e.target.value;
+          const container = document.getElementById("consoleInputRow");
+          const promptText = document.getElementById("consolePromptLabel").textContent;
+
+          // تثبيت السطر المكتوب في الكونسول بلون واضح كأنه كتب فيه مباشرة
+          appendConsoleOutput(promptText + val, "#56a8f5");
+
+          container.classList.add("hidden");
+          container.classList.remove("flex");
+          e.target.value = "";
+
+          if (inputResolveCallback) {
+            const cb = inputResolveCallback;
+            inputResolveCallback = null;
+            cb(val);
+          }
+        }
+      });
+    }
+
+    function renderPracticesManagementList() {
+      const container = document.getElementById("practicesManagementList");
+      if (!container) return;
+      container.innerHTML = "";
+      PRACTICES_DATA.forEach((p, idx) => {
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between bg-white p-2 rounded border border-slate-200 text-xs";
+        row.innerHTML = `
+          <span class="font-bold text-slate-700 truncate max-w-[200px]">${p.title}</span>
+          <button data-idx="${idx}" class="delete-practice-btn text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded font-bold transition-colors">
+            🗑 حذف
+          </button>
+        `;
+        row.querySelector(".delete-practice-btn").addEventListener("click", () => {
+          if (!confirm(`هل أنتِ متأكدة من حذف التدريب: (${p.title})؟`)) return;
+          PRACTICES_DATA.splice(idx, 1);
+          renderPracticesManagementList();
+          alert("تم حذف التدريب بنجاح ✅");
+        });
+        container.appendChild(row);
+      });
+    }
+
+    function renderSolutionsManagementList() {
+      const container = document.getElementById("solutionsManagementList");
+      if (!container) return;
+      container.innerHTML = "";
+      WORKSHEET_SOLUTIONS.forEach((ws, idx) => {
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between bg-white p-2 rounded border border-slate-200 text-xs";
+        row.innerHTML = `
+          <span class="font-bold text-slate-700 truncate max-w-[200px]">${ws.title}</span>
+          <button data-idx="${idx}" class="delete-solution-btn text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded font-bold transition-colors">
+            🗑 حذف
+          </button>
+        `;
+        row.querySelector(".delete-solution-btn").addEventListener("click", () => {
+          if (!confirm(`هل أنتِ متأكدة من حذف (${ws.title})؟`)) return;
+          WORKSHEET_SOLUTIONS.splice(idx, 1);
+          renderSolutionsManagementList();
+          alert("تم حذف حل ورقة العمل بنجاح ✅");
+        });
+        container.appendChild(row);
+      });
+    }
+
+    function openDrawer(title, contentBuilder) {
+      const drawer = document.getElementById("sideDrawer");
+      document.getElementById("drawerTitle").textContent = title;
+      const content = document.getElementById("drawerContent");
+      content.innerHTML = "";
+      contentBuilder(content);
+      drawer.classList.remove("hidden");
+    }
+    function closeDrawer() {
+      document.getElementById("sideDrawer").classList.add("hidden");
+    }
+
+    function openPracticesDrawer() {
+      openDrawer("💡 تدريبات إضافية (أكملي وصححي)", (container) => {
+        PRACTICES_DATA.forEach(p => {
+          const card = document.createElement("div");
+          card.className = "p-3 bg-slate-50 hover:bg-amber-50/60 border border-slate-200 hover:border-amber-300 rounded-xl transition-all cursor-pointer";
+          card.innerHTML = `
+            <div class="font-bold text-xs text-slate-800 mb-1">${p.title}</div>
+            <div class="text-[11px] text-slate-500 line-clamp-2">${p.task}</div>
+          `;
+          card.addEventListener("click", () => {
+            currentActiveExercise = p;
+            document.getElementById("activeFileNameBadge").textContent = `${p.id}.py`;
+            document.getElementById("submitToTeacherBtn").classList.add("hidden");
+            document.getElementById("checkSolutionBtn").classList.remove("hidden");
+            
+            const existing = openFiles.find(f => f.name === `${p.id}.py`);
+            if (!existing) {
+              openFiles.push({ name: `${p.id}.py`, content: p.code });
+            }
+            switchToFile(`${p.id}.py`);
+            closeDrawer();
+            clearConsole();
+            appendConsoleOutput(`// تم فتح التدريب الإضافي: ${p.title}`, "#808389");
+            appendConsoleOutput(`// بعد إكمال وتعديل الكود، اضغطي على زر [✨ التأكد من الحل] بالأعلى للتأكد من صحة إجابتكِ.`, "#6366f1");
+          });
+          container.appendChild(card);
+        });
+      });
+    }
+
+    function openSolutionsDrawer() {
+      openDrawer("📖 حلول أوراق العمل النموذجية (للاطلاع)", (container) => {
+        WORKSHEET_SOLUTIONS.forEach(ws => {
+          const card = document.createElement("div");
+          card.className = "p-3 bg-slate-50 hover:bg-emerald-50/60 border border-slate-200 hover:border-emerald-300 rounded-xl transition-all cursor-pointer";
+          card.innerHTML = `
+            <div class="font-bold text-xs text-slate-800 mb-1">${ws.title}</div>
+            <div class="text-[11px] text-emerald-600 font-semibold">عرض الحل النموذجي للاطلاع ⬅</div>
+          `;
+          card.addEventListener("click", () => {
+            currentActiveExercise = null;
+            document.getElementById("activeFileNameBadge").textContent = `${ws.id}_solution.py`;
+            document.getElementById("submitToTeacherBtn").classList.add("hidden");
+            document.getElementById("checkSolutionBtn").classList.add("hidden");
+            
+            const wsName = `${ws.id}_solution.py`;
+            const existing = openFiles.find(f => f.name === wsName);
+            if (!existing) {
+              openFiles.push({ name: wsName, content: ws.code });
+            }
+            switchToFile(wsName);
+            closeDrawer();
+            clearConsole();
+            appendConsoleOutput(`=== تم فتح الحل النموذجي للاطلاع: ${ws.title} ===`, "#22c55e");
+            appendConsoleOutput(`// هذا الحل مخصص للاطلاع والمراجعة الذاتية فقط.`, "#808389");
+          });
+          container.appendChild(card);
+        });
+      });
+    }
+
+    function openProjectDrawer() {
+      openDrawer("🚀 المشروع المطلوب", (container) => {
+        if (!currentTaskCloudData || currentTaskCloudData.type !== "project") {
+          container.innerHTML = `
+            <div class="p-4 text-center text-slate-500 text-xs">
+              لم تقم المعلمة بنشر مشروع لهذا الصف حالياً.
+            </div>
+          `;
+          return;
+        }
+
+        if (currentUser && currentUser.role === "student") {
+          const target = currentTaskCloudData.targetClass;
+          if (target !== "all" && target !== currentUser.class) {
+            container.innerHTML = `
+              <div class="p-4 text-center text-amber-700 bg-amber-50 rounded-lg text-xs font-semibold">
+                هذا المشروع موجه لـ (${target}) فقط، وأنتِ مسجلة في (${currentUser.class}).
+              </div>
+            `;
+            return;
+          }
+        }
+
+        const task = currentTaskCloudData;
+        const box = document.createElement("div");
+        box.className = "p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3";
+        
+        let filesHtml = "";
+        if (task.files && task.files.length > 0) {
+          filesHtml = `
+            <div class="text-xs font-bold text-slate-700">الملفات المرتبطة بالمشروع (اضغطي لفتح الملف):</div>
+            <div class="flex flex-col gap-1.5">
+              ${task.files.map((f, idx) => `
+                <button data-file-idx="${idx}" class="task-file-open-btn text-right bg-white hover:bg-purple-50 border border-slate-200 hover:border-purple-300 rounded p-2 text-xs font-mono text-purple-700 flex items-center justify-between transition-colors shadow-sm">
+                  <span>📄 ${f.name}</span>
+                  <span class="text-[10px] text-slate-400">فتح في المحرر ⬅</span>
+                </button>
+              `).join('')}
+            </div>
+          `;
+        } else {
+          // في حال تم وضع كود مباشر بدون ملفات مرفقة
+          const defaultFileName = "project_main.py";
+          filesHtml = `
+            <div class="text-xs font-bold text-slate-700">الملف الأساسي للمشروع:</div>
+            <button id="openDefaultProjectFileBtn" class="w-full text-right bg-white hover:bg-purple-50 border border-slate-200 hover:border-purple-300 rounded p-2 text-xs font-mono text-purple-700 flex items-center justify-between transition-colors shadow-sm">
+              <span>📄 ${defaultFileName}</span>
+              <span class="text-[10px] text-slate-400">فتح في المحرر ⬅</span>
+            </button>
+          `;
+        }
+
+        box.innerHTML = `
+          <div class="font-black text-sm text-slate-800">${task.title}</div>
+          <div class="text-xs text-slate-600 font-semibold">الصف المستهدف: <span class="text-purple-600">${task.targetClass === 'all' ? 'جميع الصفوف' : task.targetClass}</span></div>
+          <div class="text-xs text-slate-500">تاريخ النشر: ${task.date || 'اليوم'}</div>
+          ${filesHtml}
+        `;
+        container.appendChild(box);
+
+        box.querySelectorAll(".task-file-open-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = parseInt(btn.getAttribute("data-file-idx"), 10);
+            const file = task.files[idx];
+            if (file) {
+              const cleanCode = sanitizePythonCode(file.content);
+              currentActiveExercise = { id: "project", title: `${task.title} - ${file.name}`, isCloudTask: true };
+              document.getElementById("submitToTeacherBtn").classList.remove("hidden");
+              document.getElementById("checkSolutionBtn").classList.add("hidden");
+              
+              const existing = openFiles.find(f => f.name === file.name);
+              if (!existing) {
+                openFiles.push({ name: file.name, content: cleanCode });
+              } else {
+                existing.content = cleanCode;
+              }
+
+              // تفعيل المحرر وفك قفل الكتابة فوراً
+              if (editor) {
+                editor.setOption("readOnly", false);
+              }
+              switchToFile(file.name);
+              closeDrawer();
+              clearConsole();
+              appendConsoleOutput(`=== تم فتح ملف المشروع: ${file.name} ===`, "#9333ea");
+              appendConsoleOutput(`// يمكنكِ تشغيل المشروع بزر [Run]، وعند اكتمال الحل اضغطي [📤 إرسال المشروع للمعلمة].`, "#f59e0b");
+            }
+          });
+        });
+
+        const defaultBtn = box.querySelector("#openDefaultProjectFileBtn");
+        if (defaultBtn) {
+          defaultBtn.addEventListener("click", () => {
+            currentActiveExercise = { id: "project", title: task.title, isCloudTask: true };
+            const pName = "project_main.py";
+            const pCode = sanitizePythonCode(task.code) || `# مشروع بايثون\n# ابدئي كتابة الكود هنا:\n`;
+            const existing = openFiles.find(f => f.name === pName);
+            if (!existing) {
+              openFiles.push({ name: pName, content: pCode });
+            } else {
+              existing.content = pCode;
+            }
+
+            if (editor) {
+              editor.setOption("readOnly", false);
+            }
+            switchToFile(pName);
+            document.getElementById("submitToTeacherBtn").classList.remove("hidden");
+            document.getElementById("checkSolutionBtn").classList.add("hidden");
+            closeDrawer();
+            clearConsole();
+            appendConsoleOutput(`=== تم فتح المشروع: ${task.title} ===`, "#9333ea");
+            appendConsoleOutput(`// يمكنكِ تشغيل المشروع بزر [Run]، وعند اكتمال الحل اضغطي [📤 إرسال المشروع للمعلمة].`, "#f59e0b");
+          });
+        }
+      });
+    }
+
+    function clearConsole() {
+      document.getElementById("consoleOutputs").innerHTML = "";
+    }
+
+    function appendConsoleOutput(text, color = "#bcbec4") {
+      const outputs = document.getElementById("consoleOutputs");
+      const line = document.createElement("div");
+      line.style.color = color;
+      line.style.whiteSpace = "pre-wrap";
+      line.textContent = text;
+      outputs.appendChild(line);
+      const consoleBox = document.getElementById("pycharmConsole");
+      consoleBox.scrollTop = consoleBox.scrollHeight;
+    }
+
+    // دالة طلب الإدخال التفاعلي المباشر داخل سطر الكونسول بنمط PyCharm
+    function requestConsoleInput(promptText) {
+      return new Promise((resolve) => {
+        inputResolveCallback = resolve;
+        const container = document.getElementById("consoleInputRow");
+        const promptLabel = document.getElementById("consolePromptLabel");
+        const inputField = document.getElementById("consoleInlineInput");
+
+        promptLabel.textContent = promptText || "";
+        inputField.value = "";
+        container.classList.remove("hidden");
+        container.classList.add("flex");
+
+        const consoleBox = document.getElementById("pycharmConsole");
+        consoleBox.scrollTop = consoleBox.scrollHeight;
+        
+        setTimeout(() => inputField.focus(), 50);
+      });
+    }
+
+    async function executeCurrentCode() {
+      const rawCode = editor.getValue();
+      clearConsole();
+
+      const fileName = document.getElementById("activeFileNameBadge").textContent.trim() || "script.py";
+      appendConsoleOutput(`/usr/bin/python3.11 -u ${fileName}`, "#808389");
+
+      if (!isPyodideReady || !pyodideInstance) {
+        appendConsoleOutput("محرك بايثون قيد الإعداد، يرجى الانتظار ثوانٍ قليلة والضغط مجدداً...", "#f75464");
+        return;
+      }
+
+      // إخفاء حقل الإدخال في البداية
+      const inputRow = document.getElementById("consoleInputRow");
+      if (inputRow) {
+        inputRow.classList.add("hidden");
+        inputRow.classList.remove("flex");
+      }
+
+      // ربط دالة الإدخال بالجافاسكريبت المباشر في الكونسول
+      window._requestConsoleInput = requestConsoleInput;
+
+      try {
+        // توجيه مخرجات الطباعة إلى كونسول PyCharm
+        pyodideInstance.setStdout({
+          batched: (msg) => appendConsoleOutput(msg, "#bcbec4")
+        });
+
+        // تهيئة دالة input غير متزامنة مرتبطة بالكونسول التفاعلي مباشرة
+        await pyodideInstance.runPythonAsync(`
+import builtins
+import js
+
+async def _pycharm_console_input(prompt=""):
+    res = await js._requestConsoleInput(str(prompt))
+    return str(res)
+
+builtins.input = _pycharm_console_input
+`);
+
+        // فحص ما إذا كان الكود يحتوي على دالة input
+        // إذا كان يحتوي عليها، نقوم بتغليفه ديناميكياً داخل دالة async ليتم تنفيذ await تلقائياً دون أن تكتبها الطالبة
+        const cleanCode = sanitizePythonCode(rawCode);
+        const hasInput = /\binput\s*\(/.test(cleanCode);
+
+        if (hasInput) {
+          // تحويل استدعاءات input(...) لتُنتظر بـ await تلقائياً
+          // واستدعاء الدالة الرئيسية بـ await مما يسمح لـ float(await input()) بالعمل فوراً
+          const transformedCode = cleanCode.replace(/\binput\s*\(/g, "await input(");
+          
+          // تقسيم الأسطر وإزاحتها لتشغيلها كدالة async
+          const indentedLines = transformedCode
+            .split("\n")
+            .map(line => "    " + line)
+            .join("\n");
+
+          const runnerScript = `
+async def __run_user_script__():
+${indentedLines}
+
+await __run_user_script__()
+`;
+          await pyodideInstance.runPythonAsync(runnerScript);
+        } else {
+          // إذا لم يكن هناك input، ينفذ الكود مباشرة كالعادة
+          await pyodideInstance.runPythonAsync(cleanCode);
+        }
+
+        appendConsoleOutput("\nProcess finished with exit code 0", "#6aab73");
+      } catch (err) {
+        handlePyCharmError(err, fileName);
+      }
+    }
+
+    function handlePyCharmError(err, fileName = "script.py") {
+      let raw = err.message || String(err);
+      const lines = raw.split("\n");
+      const cleanLines = [];
+      let foundUserTrace = false;
+
+      for (let l of lines) {
+        // استبعاد استدعاءات المحرك الداخلية
+        if (l.includes("_pyodide") || l.includes("pyodide.asm") || l.includes("__run_user_script__") || l.includes("runnerScript")) continue;
+        if (l.includes('File "<exec>"') || l.includes('File "<string>"') || l.includes("line ")) {
+          foundUserTrace = true;
+          cleanLines.push(l.replace('<string>', fileName).replace('<exec>', fileName));
+        } else if (foundUserTrace || l.includes("Error:") || l.includes("SyntaxError") || l.includes("IndentationError") || l.includes("NameError") || l.includes("ValueError") || l.includes("TypeError")) {
+          cleanLines.push(l);
+        }
+      }
+
+      appendConsoleOutput("Traceback (most recent call last):", "#f75464");
+      if (cleanLines.length > 0) {
+        cleanLines.forEach(cl => appendConsoleOutput(cl, "#f75464"));
+      } else {
+        appendConsoleOutput(raw, "#f75464");
+      }
+      appendConsoleOutput("\nProcess finished with exit code 1", "#f75464");
+    }
+
+    function verifyStudentSolution() {
+      if (!currentActiveExercise) {
+        alert("اختاري أحد التدريبات الإضافية أولاً للتأكد من حله.");
+        return;
+      }
+      const code = editor.getValue();
+      const consoleText = document.getElementById("consoleOutputs").textContent;
+
+      if (currentActiveExercise.verify) {
+        const isCorrect = currentActiveExercise.verify(code, consoleText);
+        if (isCorrect) {
+          appendConsoleOutput("\n✨ إجابة صحيحة ومكتملة 100%! أحسنتِ العمل 👏", "#22c55e");
+        } else {
+          appendConsoleOutput("\n⚠️ الحل غير مكتمل أو لم يتم استبدال المطلوب بالشكل الصحيح. تأكدي من تنفيذ الكود أولاً بالضغط على Run.", "#eab308");
+        }
+      } else {
+        appendConsoleOutput("\n💡 تم فحص الكود بنجاح. يمكنكِ الآن متابعة التدريب.", "#56a8f5");
+      }
+    }
+
+    function listenToCloudTaskUpdates() {
+      if (!rtdb) return;
+      rtdb.ref("active_task").on("value", (snapshot) => {
+        const data = snapshot.val();
+        currentTaskCloudData = data;
+        updateTeacherActiveTaskStatus(data);
+      });
+    }
+
+    function listenToCloudSubmissions() {
+      if (!rtdb) return;
+      rtdb.ref("submissions").limitToLast(100).on("value", (snapshot) => {
+        const data = snapshot.val();
+        renderSubmissionsTable(data);
+      });
+    }
+
+    function updateTeacherActiveTaskStatus(data) {
+      const box = document.getElementById("activeTaskStatusBox");
+      if (!data) {
+        box.innerHTML = `<span class="text-slate-400">لا يوجد أي مشروع منشور حالياً في السحابة.</span>`;
+        return;
+      }
+      box.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="font-bold text-slate-800">${data.title}</span>
+            <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded mr-2 font-bold">مشروع</span>
+            <span class="text-xs text-slate-500 mr-2">الصف: <b>${data.targetClass === 'all' ? 'جميع الصفوف' : data.targetClass}</b></span>
+            ${data.files ? `<span class="text-xs text-purple-600 mr-2 font-bold font-mono">(${data.files.length} ملفات)</span>` : ''}
+          </div>
+          <span class="text-xs text-emerald-600 font-bold">نشط في أجهزة الطالبات ✅</span>
+        </div>
+      `;
+    }
+
+    function publishTaskFromTeacher() {
+      const targetClass = document.getElementById("teacherTargetClassSelect").value;
+      const title = document.getElementById("teacherTaskTitleInput").value.trim();
+      const code = document.getElementById("teacherTaskCodeInput").value;
+
+      if (!title) {
+        alert("الرجاء كتابة عنوان المشروع.");
+        return;
+      }
+
+      const taskData = {
+        type: "project",
+        targetClass,
+        title,
+        code,
+        files: currentUploadedFiles.length > 0 ? currentUploadedFiles : null,
+        date: new Date().toLocaleDateString("ar-KW") + " " + new Date().toLocaleTimeString("ar-KW", { hour: '2-digit', minute: '2-digit' })
+      };
+
+      if (rtdb) {
+        rtdb.ref("active_task").set(taskData)
+          .then(() => alert("تم النشر بنجاح على سحابة المدرسة ✅ تم إرسال ملفات المشروع للطالبات."))
+          .catch(e => alert("خطأ في النشر السحابي: " + e.message));
+      } else {
+        localStorage.setItem("local_active_task", JSON.stringify(taskData));
+        currentTaskCloudData = taskData;
+        updateTeacherActiveTaskStatus(taskData);
+        alert("تم النشر محلياً ✅");
+      }
+    }
+
+    function cancelCurrentTask() {
+      if (!confirm("هل أنتِ متأكدة من حذف وإلغاء نشر المشروع الحالي من أجهزة كافة الطالبات؟")) return;
+      if (rtdb) {
+        rtdb.ref("active_task").remove()
+          .then(() => alert("تم حذف المشروع من السحابة بنجاح ✅"));
+      } else {
+        localStorage.removeItem("local_active_task");
+        currentTaskCloudData = null;
+        updateTeacherActiveTaskStatus(null);
+        alert("تم حذف المشروع بنجاح ✅");
+      }
+    }
+
+    function submitWorkToTeacher() {
+      if (!currentUser || currentUser.role !== "student") {
+        alert("الرجاء تسجيل الدخول كطالبة أولاً لتسليم المشروع.");
+        return;
+      }
+
+      const code = editor.getValue();
+      const submission = {
+        studentName: currentUser.name,
+        studentClass: currentUser.class,
+        taskTitle: currentActiveExercise ? currentActiveExercise.title : "مشروع بايثون",
+        code: code,
+        timestamp: new Date().toLocaleTimeString("ar-KW", { hour: '2-digit', minute: '2-digit' })
+      };
+
+      if (rtdb) {
+        rtdb.ref("submissions").push(submission)
+          .then(() => alert(`تم إرسال المشروع بنجاح ✅ تم استلام حلكِ يا ${currentUser.name} ورصده للمعلمة أ. وفاء عليان.`))
+          .catch(e => alert("تعذر الإرسال: " + e.message));
+      } else {
+        alert(`تم حفظ تسليم المشروع بنجاح يا ${currentUser.name} ✅`);
+      }
+    }
+
+    function renderSubmissionsTable(data) {
+      currentRawSubmissions = data || {};
+      const tbody = document.getElementById("submissionsTableBody");
+      tbody.innerHTML = "";
+
+      if (!data || Object.keys(data).length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">لا توجد تسليمات جديدة حتى الآن.</td></tr>`;
+        return;
+      }
+
+      const entries = Object.entries(data).reverse();
+      const filteredEntries = entries.filter(([key, sub]) => {
+        if (currentSelectedFilterClass === "all") return true;
+        return sub.studentClass === currentSelectedFilterClass;
+      });
+
+      if (filteredEntries.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 font-semibold">لا توجد تسليمات لطالبات صف (${currentSelectedFilterClass}).</td></tr>`;
+        return;
+      }
+
+      filteredEntries.forEach(([key, sub]) => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.innerHTML = `
+          <td class="p-2.5 font-bold text-slate-800">${sub.studentName}</td>
+          <td class="p-2.5 text-indigo-700 font-bold bg-indigo-50/50">${sub.studentClass}</td>
+          <td class="p-2.5 text-slate-600">${sub.taskTitle}</td>
+          <td class="p-2.5 text-slate-400 font-mono">${sub.timestamp}</td>
+          <td class="p-2.5 text-center flex items-center justify-center gap-1.5">
+            <button class="view-code-btn bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 rounded text-[11px] font-bold transition-all">
+              عرض الكود
+            </button>
+            <button class="delete-sub-btn bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-2 py-1 rounded text-[11px] font-bold transition-all">
+              🗑 حذف
+            </button>
+          </td>
+        `;
+
+        tr.querySelector(".view-code-btn").addEventListener("click", () => {
+          document.getElementById("teacherDashboardModal").classList.add("hidden");
+          document.getElementById("teacherDashboardModal").classList.remove("flex");
+          const subFileName = `حل_${sub.studentName}.py`;
+          const cleanSubCode = sanitizePythonCode(sub.code);
+          
+          if (editor) {
+            editor.setOption("readOnly", false);
+          }
+          const existing = openFiles.find(f => f.name === subFileName);
+          if (!existing) {
+            openFiles.push({ name: subFileName, content: cleanSubCode });
+          } else {
+            existing.content = cleanSubCode;
+          }
+          switchToFile(subFileName);
+          document.getElementById("checkSolutionBtn").classList.add("hidden");
+          clearConsole();
+          appendConsoleOutput(`=== حل الطالبة: ${sub.studentName} (${sub.studentClass}) ===`, "#56a8f5");
+        });
+
+        tr.querySelector(".delete-sub-btn").addEventListener("click", () => {
+          if (!confirm(`هل أنتِ متأكدة من حذف إجابة الطالبة (${sub.studentName})؟`)) return;
+          if (rtdb) {
+            rtdb.ref(`submissions/${key}`).remove()
+              .then(() => alert("تم حذف الإجابة بنجاح ✅"));
+          } else {
+            delete currentRawSubmissions[key];
+            renderSubmissionsTable(currentRawSubmissions);
+          }
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportSubmissionsToExcel() {
+      if (!currentRawSubmissions || Object.keys(currentRawSubmissions).length === 0) {
+        alert("لا توجد تسليمات لتصديرها.");
+        return;
+      }
+
+      let csv = "\uFEFF";
+      csv += "اسم الطالبة,الصف,عنوان النشاط,وقت التسليم,كود الحل البرمجي\n";
+
+      const entries = Object.values(currentRawSubmissions).filter(sub => {
+        if (currentSelectedFilterClass === "all") return true;
+        return sub.studentClass === currentSelectedFilterClass;
+      });
+
+      if (entries.length === 0) {
+        alert(`لا توجد تسليمات خاصة بصف ${currentSelectedFilterClass} لتصديرها.`);
+        return;
+      }
+
+      entries.forEach(sub => {
+        const name = `"${(sub.studentName || '').replace(/"/g, '""')}"`;
+        const cls = `"${(sub.studentClass || '').replace(/"/g, '""')}"`;
+        const task = `"${(sub.taskTitle || '').replace(/"/g, '""')}"`;
+        const time = `"${(sub.timestamp || '').replace(/"/g, '""')}"`;
+        const code = `"${(sub.code || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+        csv += `${name},${cls},${task},${time},${code}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      const fileSuffix = currentSelectedFilterClass === "all" ? "كافة_الصفوف" : `صف_${currentSelectedFilterClass}`;
+      link.setAttribute("download", `تسليمات_بايثون_${fileSuffix}_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function clearSubmissionsList() {
+      if (!confirm("هل ترغبين في مسح سجل التسليمات بالكامل؟")) return;
+      if (rtdb) {
+        rtdb.ref("submissions").remove();
+      }
+    }
+
+    function openTeacherDashboard() {
+      const modal = document.getElementById("teacherDashboardModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      renderPracticesManagementList();
+      renderSolutionsManagementList();
+    }
+  </script>
+</body>
+</html>
