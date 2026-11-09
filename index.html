@@ -525,7 +525,7 @@
                 <div class="flex items-center justify-between mt-2">
                   <span class="text-[11px] text-slate-500">يتعرف تلقائياً على كل اسم بسطر منفصل.</span>
                   <button id="importPastedStudentsBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1 shadow-sm">
-                    <span>📥</span> استيراد وإضافة الأسماء
+                    <span>💾</span> حفظ الأسماء
                   </button>
                 </div>
               </div>
@@ -1021,7 +1021,7 @@
       label.textContent = `طالبات (${cls}) - العدد: ${students.length} · أنشأت رمزها: ${withPin}`;
 
       if (students.length === 0) {
-        listContainer.innerHTML = `<div class="text-xs text-amber-700 p-2 italic">لا توجد طالبات في هذا الصف حتى الآن. يمكنكِ لصق الأسماء بالأسفل لاستيرادها.</div>`;
+        listContainer.innerHTML = `<div class="text-xs text-amber-700 p-2 italic">لا توجد طالبات في هذا الصف حتى الآن. يمكنكِ لصق الأسماء بالأسفل ثم الضغط على حفظ.</div>`;
         return;
       }
 
@@ -1504,7 +1504,7 @@
         saveStudentsDatabase();
         refreshStudentsManageList();
         document.getElementById("pasteStudentsTextarea").value = "";
-        alert(`تم استيراد وإضافة (${addedCount}) طالبة إلى صف (${cls}) بنجاح ✅`);
+        alert("تم الحفظ ✅");
       });
 
       // زر مسح طالبات الصف المحدد
