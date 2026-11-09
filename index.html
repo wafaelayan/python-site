@@ -227,36 +227,36 @@
     <div class="flex-1 flex flex-col min-w-0 bg-white">
       
       <!-- شريط الأدوات العلوي للمحرر -->
-      <div class="bg-slate-100 border-b border-slate-200 px-2 sm:px-4 py-1.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2 overflow-x-auto shrink-0">
+      <div class="bg-slate-100 border-b border-slate-200 px-2 sm:px-4 py-1.5 flex flex-wrap items-center justify-between gap-2 sm:grid sm:grid-cols-[1fr_auto_1fr] shrink-0">
         <div class="flex items-center gap-2 justify-start min-w-0">
           <!-- زر الإرسال للمعلمة -->
-          <button id="submitToTeacherBtn" class="hidden bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-900 font-bold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition-all">
-            <span>📤</span> إرسال جميع ملفات المشروع للمعلمة
+          <button id="submitToTeacherBtn" class="whitespace-nowrap hidden bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-900 font-bold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition-all">
+            <span>📤</span> إرسال<span class="hidden sm:inline"> جميع ملفات المشروع للمعلمة</span>
           </button>
 
           <!-- زر محاكاة قاعدة البيانات -->
-          <button id="openDbSimBtn" class="hidden bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition-all" title="محاكاة تعليمات قواعد البيانات SQLite">
+          <button id="openDbSimBtn" class="whitespace-nowrap hidden bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition-all" title="محاكاة تعليمات قواعد البيانات SQLite">
             <span>🗄️</span> قاعدة البيانات
           </button>
         </div>
 
-        <!-- زر التشغيل في المنتصف -->
-        <div class="flex items-center gap-2 justify-center">
-          <button id="runCodeBtn" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black px-5 sm:px-7 py-2 rounded-xl text-sm sm:text-base flex items-center gap-2 shadow-md transition-all whitespace-nowrap">
+        <!-- زر التشغيل في المنتصف (في الجوال: سطر كامل أعلى الشريط) -->
+        <div class="flex items-center gap-2 justify-center order-first sm:order-none w-full sm:w-auto">
+          <button id="runCodeBtn" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black px-5 sm:px-7 py-2.5 sm:py-2 rounded-xl text-base flex items-center justify-center gap-2 flex-1 sm:flex-none shadow-md transition-all whitespace-nowrap">
             <span>تشغيل التعليمات البرمجية</span>
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><polygon points="5 3 19 10 5 17"/></svg>
           </button>
           <!-- زر الانتقال للملف التالي -->
-          <button id="nextFileBtn" class="hidden bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-300 font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition-all" title="الانتقال إلى الملف التالي">
+          <button id="nextFileBtn" class="whitespace-nowrap hidden bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-300 font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition-all" title="الانتقال إلى الملف التالي">
             التالي ←
           </button>
         </div>
 
         <div class="flex items-center gap-1.5 justify-end min-w-0">
-          <span id="activeFileNameBadge" class="text-[11px] sm:text-xs font-mono font-bold bg-white text-slate-700 border border-slate-300 px-2 py-0.5 rounded shadow-inner truncate max-w-[100px] sm:max-w-none">
+          <span id="activeFileNameBadge" class="hidden sm:inline-block text-[11px] sm:text-xs font-mono font-bold bg-white text-slate-700 border border-slate-300 px-2 py-0.5 rounded shadow-inner truncate max-w-[100px] sm:max-w-none">
             لا يوجد ملف
           </span>
-          <button id="clearEditorBtn" class="text-slate-600 hover:text-slate-900 border border-slate-300 bg-white hover:bg-slate-50 font-semibold px-2 py-0.5 rounded text-[11px] sm:text-xs transition-colors" title="مسح شاشة المحرر">
+          <button id="clearEditorBtn" class="whitespace-nowrap text-slate-600 hover:text-slate-900 border border-slate-300 bg-white hover:bg-slate-50 font-semibold px-2 py-0.5 rounded text-[11px] sm:text-xs transition-colors" title="مسح شاشة المحرر">
             🧹 مسح
           </button>
         </div>
@@ -2849,7 +2849,7 @@ if not getattr(sqlite3, "_sim_installed", False):
       if (!btn) return;
       const isStudent = currentUser && currentUser.role === "student";
       const locked = isStudent && getMyProjectState().locked;
-      btn.innerHTML = locked ? `<span>✅</span> تم إرسال المشروع` : `<span>📤</span> إرسال جميع ملفات المشروع للمعلمة`;
+      btn.innerHTML = locked ? `<span>✅</span> تم الإرسال<span class="hidden sm:inline"> للمعلمة</span>` : `<span>📤</span> إرسال<span class="hidden sm:inline"> جميع ملفات المشروع للمعلمة</span>`;
       ["bg-amber-500", "hover:bg-amber-600", "text-slate-900"].forEach(c => btn.classList.toggle(c, !locked));
       ["bg-slate-300", "text-slate-600"].forEach(c => btn.classList.toggle(c, locked));
     }
