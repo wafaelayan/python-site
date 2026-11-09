@@ -495,39 +495,36 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- اختيار الصف وإضافة الأسماء بالنسخ واللصق -->
             <div class="space-y-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <!-- 1) اختيار الصف أو إنشاء صف جديد -->
               <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">الصف / الشعبة المراد إدارتها:</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1">1️⃣ الصف:</label>
                 <div class="flex gap-2">
                   <select id="teacherManageClassSelect" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-800">
                     <!-- يتم تعبئتها ديناميكياً -->
                   </select>
-                  <button id="deleteClassBtn" class="shrink-0 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all" title="حذف الصف المختار">🗑 حذف الصف</button>
+                  <button id="deleteClassBtn" class="shrink-0 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all">🗑 حذف الصف</button>
                 </div>
-              </div>
-
-              <!-- خيار إضافة صف / شعبة جديدة -->
-              <div class="p-2.5 bg-white rounded-lg border border-dashed border-indigo-200">
-                <label class="block text-[11px] font-bold text-indigo-800 mb-1">➕ إنشاء صف أو شعبة جديدة:</label>
-                <div class="flex gap-1.5">
-                  <select id="newClassStageSelect" class="border border-slate-300 rounded p-1.5 text-xs font-bold bg-white">
+                <div id="newClassFields" class="hidden mt-2 flex gap-2">
+                  <select id="newClassStageSelect" class="border border-slate-300 rounded-lg p-2 text-xs font-bold bg-white">
                     <option value="10">العاشر</option>
                     <option value="11">الحادي عشر</option>
                   </select>
-                  <input type="text" id="newClassKeyInput" placeholder="مثال: 11-أدبي-3 أو 10-6" class="flex-1 min-w-0 border border-slate-300 rounded p-1.5 text-xs font-semibold">
-                  <button id="addNewClassBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded text-xs">إضافة الصف</button>
+                  <input type="text" id="newClassKeyInput" placeholder="اسم الصف، مثال: 10-6 أو 11-علمي-4" class="flex-1 min-w-0 border border-slate-300 rounded-lg p-2 text-xs font-semibold bg-white">
                 </div>
               </div>
 
-              <!-- لصق الأسماء جملة واحدة -->
+              <!-- 2) لصق الأسماء -->
               <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">📋 لصق قائمة أسماء الطالبات (كل اسم في سطر):</label>
-                <textarea id="pasteStudentsTextarea" rows="4" placeholder="انسخي الأسماء من ملف إكسيل أو وورد والصقيها هنا مباشرة...&#10;نورة خالد الأحمد&#10;مريم سالم العجمي&#10;فاطمة حسين المطيري" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-semibold leading-relaxed outline-none"></textarea>
-                <div class="flex items-center justify-between mt-2">
-                  <span class="text-[11px] text-slate-500">يتعرف تلقائياً على كل اسم بسطر منفصل.</span>
-                  <button id="importPastedStudentsBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1 shadow-sm">
-                    <span>💾</span> حفظ الأسماء
-                  </button>
-                </div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">2️⃣ الصقي أسماء الطالبات (كل اسم في سطر):</label>
+                <textarea id="pasteStudentsTextarea" rows="5" placeholder="انسخي الأسماء من ملف إكسيل أو وورد والصقيها هنا مباشرة...&#10;نورة خالد الأحمد&#10;مريم سالم العجمي&#10;فاطمة حسين المطيري" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+              </div>
+
+              <!-- 3) الحفظ -->
+              <div class="flex items-center gap-3">
+                <button id="importPastedStudentsBtn" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black px-6 py-2 rounded-lg text-sm transition-all flex items-center gap-1.5 shadow-sm">
+                  <span>💾</span> 3️⃣ حفظ
+                </button>
+                <span id="classManageStatus" class="text-xs font-bold"></span>
               </div>
             </div>
 
@@ -984,9 +981,11 @@
       if (currentSelectedFilter && selectHasValue(filterClassSel, currentSelectedFilter)) filterClassSel.value = currentSelectedFilter;
 
       // إدارة قوائم الطالبات
-      manageClassSel.innerHTML = "";
+      manageClassSel.innerHTML = `<option value="__new__">➕ صف جديد...</option>`;
       appendGroupedClassOptions(manageClassSel, classKeys);
-      if (currentSelectedManage && classKeys.includes(currentSelectedManage)) manageClassSel.value = currentSelectedManage;
+      if (currentSelectedManage && (currentSelectedManage === "__new__" || classKeys.includes(currentSelectedManage))) manageClassSel.value = currentSelectedManage;
+      else if (classKeys.length) manageClassSel.value = classKeys[0];
+      updateNewClassFields();
 
       refreshStudentsManageList();
     }
@@ -1003,9 +1002,31 @@
       return filter;
     }
 
+    // إظهار خانات الصف الجديد عند اختيار «➕ صف جديد»
+    function updateNewClassFields() {
+      const isNew = document.getElementById("teacherManageClassSelect").value === "__new__";
+      document.getElementById("newClassFields").classList.toggle("hidden", !isNew);
+      document.getElementById("deleteClassBtn").classList.toggle("hidden", isNew);
+    }
+
+    // رسالة تظهر داخل الصفحة (بدل alert الذي قد لا يظهر في بعض المتصفحات وتيمز)
+    let classStatusTimer = null;
+    function showClassStatus(msg, ok = true) {
+      const el = document.getElementById("classManageStatus");
+      el.textContent = msg;
+      el.className = "text-xs font-bold " + (ok ? "text-emerald-700" : "text-rose-600");
+      clearTimeout(classStatusTimer);
+      classStatusTimer = setTimeout(() => { el.textContent = ""; }, 5000);
+    }
+
     function refreshStudentsManageList() {
       const manageClassSel = document.getElementById("teacherManageClassSelect");
       const cls = manageClassSel.value;
+      if (cls === "__new__") {
+        document.getElementById("currentManagingClassLabel").textContent = "طالبات الصف الجديد:";
+        document.getElementById("classStudentsManageList").innerHTML = `<div class="text-xs text-slate-500 p-2">اكتبي اسم الصف، والصقي الأسماء، ثم اضغطي حفظ.</div>`;
+        return;
+      }
       const label = document.getElementById("currentManagingClassLabel");
       const listContainer = document.getElementById("classStudentsManageList");
       listContainer.innerHTML = "";
@@ -1426,85 +1447,74 @@
       const manageClassSel = document.getElementById("teacherManageClassSelect");
       manageClassSel.addEventListener("change", refreshStudentsManageList);
 
-      // زر حذف الصف المختار
+      manageClassSel.addEventListener("change", () => {
+        updateNewClassFields();
+        resetDeleteClassBtn();
+        document.getElementById("classManageStatus").textContent = "";
+      });
+
+      // حذف الصف: ضغطة للتأكيد ثم ضغطة ثانية للحذف
+      let deleteClassArmed = false, deleteClassTimer = null;
+      function resetDeleteClassBtn() {
+        deleteClassArmed = false;
+        clearTimeout(deleteClassTimer);
+        const btn = document.getElementById("deleteClassBtn");
+        btn.textContent = "🗑 حذف الصف";
+        btn.classList.remove("bg-rose-600", "text-white");
+        btn.classList.add("bg-rose-50", "text-rose-700");
+      }
       document.getElementById("deleteClassBtn").addEventListener("click", () => {
         const cls = manageClassSel.value;
-        if (!cls || !STUDENTS_DATABASE[cls]) {
-          alert("الرجاء اختيار الصف أولاً.");
+        if (!cls || !STUDENTS_DATABASE[cls]) return;
+        const btn = document.getElementById("deleteClassBtn");
+        if (!deleteClassArmed) {
+          deleteClassArmed = true;
+          btn.textContent = "اضغطي مرة أخرى للتأكيد";
+          btn.classList.remove("bg-rose-50", "text-rose-700");
+          btn.classList.add("bg-rose-600", "text-white");
+          deleteClassTimer = setTimeout(resetDeleteClassBtn, 4000);
           return;
         }
-        const count = (STUDENTS_DATABASE[cls] || []).length;
-        if (!confirm(`حذف الصف (${cls}) نهائياً؟\nسيتم حذف أسماء طالباته (${count}) من المنصة، ولن يظهر في شاشة الدخول.\nالتسليمات السابقة تبقى محفوظة.`)) return;
+        resetDeleteClassBtn();
         delete STUDENTS_DATABASE[cls];
         saveStudentsDatabase();
         populateAllClassSelects();
-        alert(`تم حذف الصف (${cls}) ✅`);
+        showClassStatus(`تم حذف الصف (${cls}) ✅`);
       });
 
-      // زر إضافة شعبة أو صف جديد
-      document.getElementById("addNewClassBtn").addEventListener("click", () => {
-        let key = document.getElementById("newClassKeyInput").value.trim();
-        const newStage = document.getElementById("newClassStageSelect").value;
-        if (!key) {
-          alert("الرجاء إدخال اسم الصف / الشعبة.");
-          return;
-        }
-        // ربط الشعبة بالمرحلة المختارة (يبدأ اسمها برقم المرحلة)
-        if (getClassStage(key) !== newStage) {
-          key = `${newStage}-${key}`;
-        }
-        if (STUDENTS_DATABASE[key]) {
-          alert("هذا الصف مضاف مسبقاً!");
-          return;
-        }
-        STUDENTS_DATABASE[key] = [];
-        saveStudentsDatabase();
-        populateAllClassSelects();
-        manageClassSel.value = key;
-        refreshStudentsManageList();
-        document.getElementById("newClassKeyInput").value = "";
-        alert(`تمت إضافة الصف (${key}) بنجاح! يمكنكِ الآن لصق أسماء طالباته.`);
-      });
-
-      // زر استيراد الأسماء المنسوخة
+      // زر الحفظ: ينشئ الصف الجديد (إن وُجد) ويحفظ الأسماء
       document.getElementById("importPastedStudentsBtn").addEventListener("click", () => {
-        const cls = manageClassSel.value;
-        if (!cls) {
-          alert("الرجاء اختيار الصف أولاً.");
-          return;
-        }
-        const text = document.getElementById("pasteStudentsTextarea").value;
-        if (!text.trim()) {
-          alert("الرجاء لصق قائمة الأسماء أولاً.");
-          return;
-        }
-
-        // معالجة النص: تقسيم الأسطر، إزالة الفراغات والأرقام التسلسلية إن وجدت
-        const lines = text.split(/\r?\n/)
+        let cls = manageClassSel.value;
+        const lines = document.getElementById("pasteStudentsTextarea").value.split(/\r?\n/)
           .map(l => l.replace(/^[0-9]+[\.\-\)]\s*/, '').trim())
           .filter(l => l.length > 2);
 
-        if (lines.length === 0) {
-          alert("لم يتم العثور على أي أسماء صالحة للإضافة.");
-          return;
+        if (cls === "__new__") {
+          let key = document.getElementById("newClassKeyInput").value.trim();
+          const newStage = document.getElementById("newClassStageSelect").value;
+          if (!key) return showClassStatus("اكتبي اسم الصف أولاً.", false);
+          if (getClassStage(key) !== newStage) key = `${newStage}-${key}`;
+          if (STUDENTS_DATABASE[key]) return showClassStatus("هذا الصف موجود مسبقاً.", false);
+          if (!lines.length) return showClassStatus("الصقي أسماء الطالبات أولاً.", false);
+          STUDENTS_DATABASE[key] = [];
+          cls = key;
+          document.getElementById("newClassKeyInput").value = "";
+        } else if (!cls || !STUDENTS_DATABASE[cls]) {
+          return showClassStatus("اختاري الصف أولاً.", false);
+        } else if (!lines.length) {
+          return showClassStatus("الصقي أسماء الطالبات أولاً.", false);
         }
 
-        if (!STUDENTS_DATABASE[cls]) {
-          STUDENTS_DATABASE[cls] = [];
-        }
-
-        let addedCount = 0;
         lines.forEach(name => {
-          if (!STUDENTS_DATABASE[cls].includes(name)) {
-            STUDENTS_DATABASE[cls].push(name);
-            addedCount++;
-          }
+          if (!STUDENTS_DATABASE[cls].includes(name)) STUDENTS_DATABASE[cls].push(name);
         });
-
         saveStudentsDatabase();
+        populateAllClassSelects();
+        manageClassSel.value = cls;
+        updateNewClassFields();
         refreshStudentsManageList();
         document.getElementById("pasteStudentsTextarea").value = "";
-        alert("تم الحفظ ✅");
+        showClassStatus("تم الحفظ ✅");
       });
 
       // زر مسح طالبات الصف المحدد
