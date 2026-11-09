@@ -39,6 +39,15 @@
       height: 100vh;
       height: 100dvh;
     }
+    /* الملاحظات بعد # في المحرر: خلفية صفراء فاتحة ونص أسود غامق */
+    .CodeMirror .cm-comment {
+      background: #fef9c3;
+      color: #000 !important;
+      font-weight: 800;
+      font-style: normal;
+      border-radius: 3px;
+      padding: 1px 0;
+    }
     .code-font {
       font-family: 'Fira Code', monospace;
     }
@@ -195,7 +204,7 @@
     <!-- أزرار المشروع وأرشيف الحلول للطالبة -->
     <div class="flex items-center justify-center gap-2 order-last sm:order-none w-full sm:w-auto">
       <button id="openProjectBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3.5 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 transition-all shadow-sm">
-        <span>🚀</span> المشروع المطلوب
+        <span>🚀</span> مشروع الفترة الأولى
       </button>
 
       <!-- زر الاطلاع على الحل المرسل للطالبة (سحابي داخل المنصة) -->
@@ -492,6 +501,7 @@
                   <select id="teacherManageClassSelect" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-800">
                     <!-- يتم تعبئتها ديناميكياً -->
                   </select>
+                  <button id="deleteClassBtn" class="shrink-0 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all" title="حذف الصف المختار">🗑 حذف الصف</button>
                 </div>
               </div>
 
@@ -792,7 +802,8 @@
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          STUDENTS_DATABASE = Object.assign(STUDENTS_DATABASE, parsed);
+          // استبدال كامل (وليس دمجاً) حتى لا تعود الصفوف المحذوفة
+          if (parsed && typeof parsed === "object") STUDENTS_DATABASE = parsed;
         } catch (e) {}
       }
     }
@@ -1415,6 +1426,21 @@
       const manageClassSel = document.getElementById("teacherManageClassSelect");
       manageClassSel.addEventListener("change", refreshStudentsManageList);
 
+      // زر حذف الصف المختار
+      document.getElementById("deleteClassBtn").addEventListener("click", () => {
+        const cls = manageClassSel.value;
+        if (!cls || !STUDENTS_DATABASE[cls]) {
+          alert("الرجاء اختيار الصف أولاً.");
+          return;
+        }
+        const count = (STUDENTS_DATABASE[cls] || []).length;
+        if (!confirm(`حذف الصف (${cls}) نهائياً؟\nسيتم حذف أسماء طالباته (${count}) من المنصة، ولن يظهر في شاشة الدخول.\nالتسليمات السابقة تبقى محفوظة.`)) return;
+        delete STUDENTS_DATABASE[cls];
+        saveStudentsDatabase();
+        populateAllClassSelects();
+        alert(`تم حذف الصف (${cls}) ✅`);
+      });
+
       // زر إضافة شعبة أو صف جديد
       document.getElementById("addNewClassBtn").addEventListener("click", () => {
         let key = document.getElementById("newClassKeyInput").value.trim();
@@ -1614,7 +1640,7 @@
     function openProjectDrawer() {
       drawerMode = "project";
       setDrawerWide(false);
-      openDrawer("🚀 المشروع المطلوب", (container) => {
+      openDrawer("🚀 مشروع الفترة الأولى", (container) => {
         if (!currentUser) {
           container.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs">يرجى تسجيل الدخول أولاً لعرض مشروع مرحلتكِ.</div>`;
           return;
