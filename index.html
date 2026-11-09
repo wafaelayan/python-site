@@ -227,13 +227,8 @@
     <div class="flex-1 flex flex-col min-w-0 bg-white">
       
       <!-- شريط الأدوات العلوي للمحرر -->
-      <div class="bg-slate-100 border-b border-slate-200 px-2 sm:px-4 py-1.5 flex items-center justify-between gap-1 overflow-x-auto shrink-0">
-        <div class="flex items-center gap-2 shrink-0">
-          <button id="runCodeBtn" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition-all">
-            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><polygon points="5 3 19 10 5 17"/></svg>
-            <span>Run</span>
-          </button>
-
+      <div class="bg-slate-100 border-b border-slate-200 px-2 sm:px-4 py-1.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2 overflow-x-auto shrink-0">
+        <div class="flex items-center gap-2 justify-start min-w-0">
           <!-- زر الإرسال للمعلمة -->
           <button id="submitToTeacherBtn" class="hidden bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-900 font-bold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition-all">
             <span>📤</span> إرسال جميع ملفات المشروع للمعلمة
@@ -245,10 +240,19 @@
           </button>
         </div>
 
-        <div class="flex items-center gap-1.5 shrink-0">
-          <button id="createNewFileBtn" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 font-bold px-2 py-1 rounded text-[11px] sm:text-xs flex items-center gap-1 shadow-sm transition-all" title="إنشاء ملف بايثون جديد">
-            <span>➕</span> ملف جديد
+        <!-- زر التشغيل في المنتصف -->
+        <div class="flex items-center gap-2 justify-center">
+          <button id="runCodeBtn" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black px-5 sm:px-7 py-2 rounded-xl text-sm sm:text-base flex items-center gap-2 shadow-md transition-all whitespace-nowrap">
+            <span>تشغيل التعليمات البرمجية</span>
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><polygon points="5 3 19 10 5 17"/></svg>
           </button>
+          <!-- زر الانتقال للملف التالي -->
+          <button id="nextFileBtn" class="hidden bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-300 font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition-all" title="الانتقال إلى الملف التالي">
+            التالي ←
+          </button>
+        </div>
+
+        <div class="flex items-center gap-1.5 justify-end min-w-0">
           <span id="activeFileNameBadge" class="text-[11px] sm:text-xs font-mono font-bold bg-white text-slate-700 border border-slate-300 px-2 py-0.5 rounded shadow-inner truncate max-w-[100px] sm:max-w-none">
             لا يوجد ملف
           </span>
@@ -347,6 +351,22 @@
       <div id="projectNoticeBody" class="p-4 sm:p-5 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2"></div>
       <div class="px-4 pb-4 flex justify-end">
         <button id="projectNoticeOkBtn" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-2 rounded-lg text-xs sm:text-sm">فهمت ✔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== نافذة إعلام الطالبة بوجود مشروع ==================== -->
+  <div id="newProjectPromptModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[60] p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden text-center">
+      <div class="p-5 sm:p-6 space-y-2">
+        <div class="text-4xl">🚀</div>
+        <p class="font-black text-slate-800 text-sm sm:text-base">تم إرسال المشروع من قبل المعلمة</p>
+        <p id="newProjectPromptTitle" class="text-xs sm:text-sm font-bold text-purple-700"></p>
+        <p class="text-xs sm:text-sm text-slate-600">هل ترغبين في فتحه؟</p>
+      </div>
+      <div class="px-5 pb-5 flex gap-2 justify-center">
+        <button id="newProjectPromptOpenBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg text-sm">نعم</button>
+        <button id="newProjectPromptLaterBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold px-6 py-2 rounded-lg text-sm">لاحقاً</button>
       </div>
     </div>
   </div>
@@ -690,6 +710,10 @@
     let pyodideInstance = null;
     let isPyodideReady = false;
     let currentActiveExercise = null;
+    let currentProjectTask = null;
+    let locksLoaded = false;
+    let tasksLoaded = false;
+    let projectPromptShownFor = null;
     let currentStageTasks = {};   // { "10": {...مشروع العاشر}, "11": {...مشروع الحادي عشر} }
     const STAGE_LABELS = { "10": "الصف العاشر", "11": "الصف الحادي عشر", "other": "صفوف أخرى" };
 
@@ -996,7 +1020,7 @@
           <span class="font-bold text-slate-800">${idx + 1}. ${name}
             <span class="text-[10px] font-semibold ${pinInfo ? "text-emerald-600" : "text-slate-400"}">${pinInfo ? "🔐 أنشأت رمزها" : "⚪ لم تدخل بعد"}</span></span>
           <span class="flex items-center gap-1 shrink-0">
-          ${pinInfo ? `<button class="reset-pin-btn text-[11px] text-indigo-700 hover:text-indigo-900 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded font-bold transition-all" title="إعادة تعيين الرمز السري">🔄 الرمز</button>` : ""}
+          ${pinInfo ? `<button class="reset-pin-btn text-[11px] text-indigo-700 hover:text-indigo-900 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded font-bold transition-all" title="إعادة تعيين الرمز السري">🔄 إعادة تعيين كلمة المرور</button>` : ""}
           <button data-idx="${idx}" class="delete-student-btn text-[11px] text-rose-600 hover:text-rose-800 bg-rose-50 px-2 py-0.5 rounded font-bold transition-all">حذف 🗑</button>
           </span>
         `;
@@ -1039,7 +1063,9 @@
       editor.on("change", () => {
         const file = openFiles.find(f => f.name === currentActiveFileName);
         if (file) {
+          const before = isProjectFileSolved(file);
           file.content = editor.getValue();
+          if (isProjectFileSolved(file) !== before) renderEditorTabs();
         }
       });
       editor.on("change", scheduleDbCodeSectionRefresh);
@@ -1069,19 +1095,18 @@
       };
     }
 
+    const DEFAULT_FILE_NAME = "main.py";
+
     function renderEditorTabs() {
       const tabsBar = document.getElementById("editorTabsContainer");
       if (!tabsBar) return;
       tabsBar.innerHTML = "";
 
+      // لا يوجد ملف: نفتح ملفاً افتراضياً لتكتب الطالبة مباشرة
       if (openFiles.length === 0) {
-        tabsBar.innerHTML = `<span class="text-xs text-slate-500 py-1 px-2 italic">لا يوجد ملف مفتوح حالياً. اضغطي على زر [➕ ملف جديد] أو افتحي المشروع للبدء.</span>`;
-        document.getElementById("activeFileNameBadge").textContent = "لا يوجد ملف";
-        if (editor) {
-          editor.setValue("");
-          editor.setOption("readOnly", "nocursor");
-        }
-        return;
+        openFiles.push({ name: DEFAULT_FILE_NAME, content: "" });
+        currentActiveFileName = DEFAULT_FILE_NAME;
+        if (editor) editor.setValue("");
       }
 
       if (editor && editor.getOption("readOnly")) {
@@ -1097,9 +1122,10 @@
             : "bg-slate-100 text-slate-800 border-transparent hover:bg-slate-50"
         }`;
         
+        const solved = isProjectFileSolved(file);
         tab.innerHTML = `
-          <span>🐍 ${file.name}</span>
-          <span class="close-file-tab hover:text-rose-600 font-bold ml-1" title="إغلاق الملف">&times;</span>
+          ${solved ? '<span class="text-emerald-600 font-black">✓</span>' : ''}<span>${solved ? '' : '🐍 '}${file.name}</span>
+          ${openFiles.length > 1 ? '<span class="close-file-tab hover:text-rose-600 font-bold ml-1" title="إغلاق الملف">&times;</span>' : ''}
         `;
 
         tab.addEventListener("click", (e) => {
@@ -1119,6 +1145,26 @@
       });
 
       document.getElementById("activeFileNameBadge").textContent = currentActiveFileName;
+      updateNextFileBtn();
+    }
+
+    // ملف من ملفات المشروع عدّلت عليه الطالبة ← علامة ✓
+    function isProjectFileSolved(file) {
+      if (!currentProjectTask || !file) return false;
+      const pf = getTaskProjectFiles(currentProjectTask).find(f => f.name === file.name);
+      return !!pf && fileSolveState(file.content, pf.original) === "done";
+    }
+
+    function updateNextFileBtn() {
+      const btn = document.getElementById("nextFileBtn");
+      if (btn) btn.classList.toggle("hidden", openFiles.length < 2);
+    }
+
+    function goToNextFile() {
+      if (openFiles.length < 2) return;
+      const idx = openFiles.findIndex(f => f.name === currentActiveFileName);
+      switchToFile(openFiles[(idx + 1) % openFiles.length].name);
+      clearConsole();
     }
 
     function switchToFile(fileName) {
@@ -1238,6 +1284,7 @@
         nameText.textContent = `🎓 ${user.name} (${user.class})`;
         teacherBtn.classList.add("hidden");
         mySubBtn.classList.remove("hidden");
+        currentProjectTask = null;
         openFiles = [];
         currentActiveFileName = "";
         if (editor) {
@@ -1252,6 +1299,8 @@
       updateDbSimAvailability();
       updateSubmitButtonState();
       hideLoginModal();
+      projectPromptShownFor = null;
+      maybeShowNewProjectPrompt();
     }
 
     // محاكاة قواعد البيانات متاحة لطالبات الحادي عشر والمعلمة فقط
@@ -1267,6 +1316,8 @@
 
     function logout() {
       currentUser = null;
+      hideNewProjectPrompt();
+      currentProjectTask = null;
       openFiles = [];
       currentActiveFileName = "";
       if (editor) {
@@ -1476,6 +1527,9 @@
       });
 
       document.getElementById("runCodeBtn").addEventListener("click", executeCurrentCode);
+      document.getElementById("nextFileBtn").addEventListener("click", goToNextFile);
+      document.getElementById("newProjectPromptOpenBtn").addEventListener("click", openProjectFromPrompt);
+      document.getElementById("newProjectPromptLaterBtn").addEventListener("click", hideNewProjectPrompt);
       
       // فتح نافذة إجبار الطالبة على اختيار الملفات
       document.getElementById("submitToTeacherBtn").addEventListener("click", openStudentSubmitModal);
@@ -1503,7 +1557,6 @@
         editor.focus();
       });
 
-      document.getElementById("createNewFileBtn").addEventListener("click", createNewStudentFile);
 
       document.getElementById("consoleInlineInput").addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
@@ -1580,10 +1633,7 @@
               </div>`;
             return;
           }
-          const pState = getMyProjectState();
-          container.appendChild(buildProjectNoticeBanner(pState));
           renderTaskCard(container, task);
-          showProjectNotice(pState);
           return;
         }
 
@@ -1671,11 +1721,21 @@
 
     function openTaskFileInEditor(task, name, code) {
       currentActiveExercise = { id: "project", title: task.title, stage: task.stage, isCloudTask: true };
+      currentProjectTask = task;
       syncActiveFileContent();
-      const existing = openFiles.find(f => f.name === name);
-      if (!existing) {
-        openFiles.push({ name, content: code });
+      // إزالة الملف الافتراضي الفارغ عند فتح المشروع
+      const defIdx = openFiles.findIndex(f => f.name === DEFAULT_FILE_NAME && !(f.content || "").trim());
+      if (defIdx !== -1 && !getTaskProjectFiles(task).some(pf => pf.name === DEFAULT_FILE_NAME)) {
+        openFiles.splice(defIdx, 1);
+        if (currentActiveFileName === DEFAULT_FILE_NAME) currentActiveFileName = "";
       }
+      // فتح جميع ملفات المشروع كتبويبات حتى تراها الطالبة كلها
+      getTaskProjectFiles(task).forEach(pf => {
+        if (!openFiles.some(f => f.name === pf.name)) {
+          openFiles.push({ name: pf.name, content: pf.name === name ? code : pf.original });
+        }
+      });
+      if (!openFiles.some(f => f.name === name)) openFiles.push({ name, content: code });
       if (editor) editor.setOption("readOnly", false);
       switchToFile(name);
       if (currentUser && currentUser.role === "student") {
@@ -1684,7 +1744,7 @@
       closeDrawer();
       clearConsole();
       appendConsoleOutput(`=== تم فتح ملف المشروع: ${name} ===`, "#9333ea");
-      appendConsoleOutput(`// يمكنكِ تشغيل الكود بزر [Run]، وعند الانتهاء من جميع الملفات اضغطي [📤 إرسال جميع ملفات المشروع للمعلمة].`, "#f59e0b");
+      appendConsoleOutput(`// يمكنكِ تشغيل الكود بزر [تشغيل التعليمات البرمجية]، وعند الانتهاء من جميع الملفات اضغطي [📤 إرسال جميع ملفات المشروع للمعلمة].`, "#f59e0b");
     }
 
     function renderTaskCard(container, task) {
@@ -1693,16 +1753,13 @@
 
       const isStudent = currentUser && currentUser.role === "student";
       const statuses = isStudent ? getProjectFilesStatus(task).filter(f => f.isProject) : getTaskProjectFiles(task).map(f => ({ name: f.name }));
-      const unsolved = statuses.filter(f => f.state && f.state !== "done");
       const filesHtml = `
         <div class="text-xs font-bold text-slate-700">ملفات المشروع (اضغطي لفتح الملف):</div>
-        ${isStudent && unsolved.length ? `<div class="text-[11px] font-bold text-amber-900 bg-amber-50 border border-amber-300 rounded-lg p-2">⚠️ لم تحلّي بعد: ${unsolved.map(f => `<span dir="ltr" class="font-mono">${escapeHtml(f.name)}</span>`).join("، ")}</div>` : ""}
-        ${isStudent && statuses.length && !unsolved.length ? `<div class="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg p-2">✅ عملتِ على جميع ملفات المشروع، راجعيها ثم أرسليها.</div>` : ""}
         <div class="flex flex-col gap-1.5">
           ${statuses.map(f => `
             <button data-file-name="${escapeHtml(f.name)}" class="task-file-open-btn text-right bg-white hover:bg-purple-50 border border-slate-300 hover:border-purple-400 rounded p-2 text-xs flex items-center justify-between gap-2 transition-colors shadow-sm">
               <span dir="ltr" class="font-mono font-extrabold text-slate-900">📄 ${escapeHtml(f.name)}</span>
-              ${f.state ? solveBadge(f.state) : `<span class="text-[10px] text-slate-500">فتح في المحرر ⬅</span>`}
+              <span class="text-[10px] text-slate-500">فتح في المحرر ⬅</span>
             </button>`).join("")}
         </div>`;
 
@@ -2306,7 +2363,7 @@ if not getattr(sqlite3, "_sim_installed", False):
       stepsBox.className = "p-2.5 bg-white border border-slate-200 rounded-lg";
       let stepsHtml = `<div class="text-xs font-black text-slate-800 mb-1.5">🧭 خطوات التنفيذ (آخر تشغيل)</div>`;
       if (steps.length === 0) {
-        stepsHtml += `<div class="text-[11px] text-slate-400">اضغطي Run لتنفيذ التعليمات.</div>`;
+        stepsHtml += `<div class="text-[11px] text-slate-400">اضغطي زر التشغيل لتنفيذ التعليمات.</div>`;
       } else {
         stepsHtml += `<ol class="space-y-1">` + steps.map((st, i) => {
           const warn = st.sub && st.sub.startsWith("⚠️") ? `<div class="text-[10px] text-amber-700 font-bold">${escapeHtml(st.sub)}</div>` : "";
@@ -2398,7 +2455,7 @@ if not getattr(sqlite3, "_sim_installed", False):
 
       const shownDbs = info.dbFile ? dbSnapshot.filter(d => d.file === info.dbFile) : dbSnapshot;
       if (!shownDbs.length) {
-        html += `<div class="text-xs text-slate-400 p-2">${info.dbFile ? `قاعدة البيانات <span dir="ltr" class="font-mono">${escapeHtml(info.dbFile)}</span> لم تُنشأ بعد — اضغطي Run لتنفيذ التعليمات.` : "لا توجد قاعدة بيانات بعد. اكتبي تعليمة الاتصال ثم اضغطي Run."}</div>`;
+        html += `<div class="text-xs text-slate-400 p-2">${info.dbFile ? `قاعدة البيانات <span dir="ltr" class="font-mono">${escapeHtml(info.dbFile)}</span> لم تُنشأ بعد — اضغطي زر التشغيل لتنفيذ التعليمات.` : "لا توجد قاعدة بيانات بعد. اكتبي تعليمة الاتصال ثم اضغطي زر التشغيل."}</div>`;
       }
 
       shownDbs.forEach(db => {
@@ -2418,7 +2475,7 @@ if not getattr(sqlite3, "_sim_installed", False):
         mainTables.forEach(t => { html += renderTablePreviewHtml(t, effects[t.name.toLowerCase()], true); });
         notCreated.forEach(t => {
           html += `<div class="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-2 text-xs text-amber-800">
-            ⏳ جدول <b dir="ltr" class="font-mono">${escapeHtml(t.name)}</b> مكتوب في الكود لكنه لم يُنشأ بعد في قاعدة البيانات — اضغطي Run.</div>`;
+            ⏳ جدول <b dir="ltr" class="font-mono">${escapeHtml(t.name)}</b> مكتوب في الكود لكنه لم يُنشأ بعد في قاعدة البيانات — اضغطي زر التشغيل.</div>`;
         });
         if (!db.tables.length && !db.error && !notCreated.length) {
           html += `<div class="text-xs text-slate-400">قاعدة البيانات فارغة: لا توجد جداول بعد (استخدمي CREATE TABLE).</div>`;
@@ -2443,14 +2500,17 @@ if not getattr(sqlite3, "_sim_installed", False):
     function listenToCloudTaskUpdates() {
       if (!rtdb) {
         currentStageTasks = loadLocalStageTasks();
+        tasksLoaded = true;
         updateTeacherActiveTaskStatus();
         return;
       }
       // كل مرحلة لها مشروعها المستقل: active_tasks/10 و active_tasks/11
       rtdb.ref("active_tasks").on("value", (snapshot) => {
         currentStageTasks = snapshot.val() || {};
+        tasksLoaded = true;
         updateTeacherActiveTaskStatus();
         updateSubmitButtonState();
+        maybeShowNewProjectPrompt();
       });
     }
 
@@ -2623,13 +2683,13 @@ if not getattr(sqlite3, "_sim_installed", False):
       const hasPin = !!getStudentPin(name, cls);
       if (hasPin) {
         label.textContent = "🔒 أدخلي رمزكِ السري (4 أرقام):";
-        hint.textContent = "نسيتِ الرمز؟ اطلبي من المعلمة إعادة تعيينه.";
+        hint.textContent = "";
         confirmWrap.classList.add("hidden");
         btn.textContent = "دخول المنصة 🚀";
       } else {
         label.textContent = "🆕 أول دخول: اختاري رمزاً سرياً من 4 أرقام:";
         hint.textContent = "احفظي الرمز جيداً ولا تخبري به أحداً، ستحتاجينه في كل مرة تدخلين فيها.";
-        confirmWrap.classList.remove("hidden");
+        confirmWrap.classList.add("hidden");
         btn.textContent = "إنشاء الرمز والدخول 🔐";
       }
     }
@@ -2667,12 +2727,11 @@ if not getattr(sqlite3, "_sim_installed", False):
           if (pinFailedAttempts >= 5) {
             pinBlockedUntil = Date.now() + 60000;
             pinFailedAttempts = 0;
-            return fail("الرمز غير صحيح 5 مرات. تم إيقاف المحاولة لمدة دقيقة.");
+            return fail("كلمة السر خاطئة، عند نسيانها يرجى مراجعة المعلمة. (انتظري دقيقة قبل المحاولة مجدداً)");
           }
-          return fail(`الرمز السري غير صحيح. (المحاولات المتبقية: ${5 - pinFailedAttempts})`);
+          return fail("كلمة السر خاطئة، عند نسيانها يرجى مراجعة المعلمة.");
         }
       } else {
-        if (pin !== pin2) return fail("الرمزان غير متطابقين، أعيدي كتابة الرمز في الخانتين.");
         if (/^(\d)\1{3}$/.test(pin) || pin === "1234" || pin === "4321") return fail("اختاري رمزاً أصعب (لا تستخدمي 1234 أو أرقاماً متكررة).");
         try {
           // التأكد أن لا أحد أنشأ رمزاً لهذا الاسم في نفس اللحظة
@@ -2696,12 +2755,39 @@ if not getattr(sqlite3, "_sim_installed", False):
 
     // المعلمة: إعادة تعيين رمز طالبة
     function resetStudentPin(name, cls) {
-      if (!confirm(`إعادة تعيين الرمز السري للطالبة (${name})؟\nسيتم تسجيل خروجها وستختار رمزاً جديداً عند الدخول.`)) return;
-      writeStudentPin(studentKeyOf(name, cls), null).then(() => alert(`تمت إعادة تعيين رمز (${name}) ✅`));
+      if (!confirm(`إعادة تعيين كلمة المرور للطالبة (${name})؟\nستختار كلمة مرور جديدة عند دخولها القادم.`)) return;
+      writeStudentPin(studentKeyOf(name, cls), null).then(() => alert(`تمت إعادة تعيين كلمة المرور للطالبة (${name}) ✅`));
     }
 
     // ==================== الإرسال مرة واحدة + سماح المعلمة بإعادة الإرسال ====================
     let allSubmissionLocks = {};   // submission_locks/{taskId}/{studentKey}
+
+    // عند دخول الطالبة: إعلامها بوجود مشروع من المعلمة لم ترسله بعد
+    function maybeShowNewProjectPrompt() {
+      if (!currentUser || currentUser.role !== "student" || !tasksLoaded || !locksLoaded) return;
+      const state = getMyProjectState();
+      if (!state.task || state.locked) return;
+      const taskId = getTaskId(state.task);
+      if (projectPromptShownFor === taskId || currentProjectTask) return;
+      projectPromptShownFor = taskId;
+      document.getElementById("newProjectPromptTitle").textContent = state.task.title || "";
+      const modal = document.getElementById("newProjectPromptModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function hideNewProjectPrompt() {
+      const modal = document.getElementById("newProjectPromptModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function openProjectFromPrompt() {
+      hideNewProjectPrompt();
+      const task = getTaskForCurrentStudent();
+      const first = getTaskProjectFiles(task)[0];
+      if (task && first) openTaskFileInEditor(task, first.name, first.original);
+    }
 
     function fbKey(v) {
       return String(v || "").replace(/[.#$\[\]\/]/g, "_").trim() || "_";
@@ -2740,17 +2826,20 @@ if not getattr(sqlite3, "_sim_installed", False):
     function listenToSubmissionLocks() {
       if (!rtdb) {
         allSubmissionLocks = loadLocalLocks();
+        locksLoaded = true;
         onLocksChanged();
         return;
       }
       rtdb.ref("submission_locks").on("value", (snap) => {
         allSubmissionLocks = snap.val() || {};
+        locksLoaded = true;
         onLocksChanged();
       });
     }
 
     function onLocksChanged() {
       updateSubmitButtonState();
+      maybeShowNewProjectPrompt();
       if (currentUser && currentUser.role === "teacher") renderSubmissionsTable(currentRawSubmissions);
     }
 
@@ -2786,7 +2875,7 @@ if not getattr(sqlite3, "_sim_installed", False):
             <li><b>يُسمح بإرسال المشروع مرة واحدة فقط.</b></li>
             <li>عند الإرسال تُرسل <b>جميع ملفات المشروع معاً دفعة واحدة</b>.</li>
             <li>بجانب كل ملف تظهر حالته: ✅ تم العمل عليه، ⚠️ لم تحلّيه بعد، ⬜ لم تفتحيه بعد.</li>
-            <li>أنهي جميع الملفات وجرّبيها بزر Run قبل الضغط على زر الإرسال.</li>
+            <li>أنهي جميع الملفات وجرّبيها بزر التشغيل قبل الضغط على زر الإرسال.</li>
             <li>بعد الإرسال لا يمكن الإرسال مجدداً إلا إذا سمحت المعلمة بذلك.</li>
           </ul>`
       };
@@ -2950,8 +3039,8 @@ if not getattr(sqlite3, "_sim_installed", False):
 
         closeStudentSubmitModal();
         updateSubmitButtonState();
-        alert(`تم إرسال المشروع بنجاح ✅\nتم إرسال جميع الملفات (${allFiles.length}) للمعلمة أ. وفاء عليان دفعة واحدة.\n🔒 لا يمكن الإرسال مرة أخرى إلا إذا سمحت المعلمة بذلك.`);
-        appendConsoleOutput(`\n✅ تم إرسال جميع ملفات المشروع (${allFiles.length}) للمعلمة أ. وفاء عليان.`, "#22c55e");
+        alert(`تم إرسال المشروع بنجاح ✅\nتم إرسال جميع الملفات (${allFiles.length}) للمعلمة دفعة واحدة.\n🔒 لا يمكن الإرسال مرة أخرى إلا إذا سمحت المعلمة بذلك.`);
+        appendConsoleOutput(`\n✅ تم إرسال جميع ملفات المشروع (${allFiles.length}) للمعلمة.`, "#22c55e");
         appendConsoleOutput(`// يمكنكِ الاطلاع على نسختكِ المرسلة من خلال [📋 أرشيف حلي المرسل].`, "#38bdf8");
       } catch (e) {
         showErr("تعذر الإرسال: " + (e.message || e));
