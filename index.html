@@ -48,6 +48,51 @@
       border-radius: 3px;
       padding: 1px 0;
     }
+    /* سطر الملاحظة (يبدأ بـ #) مظلل بعرض السطر كاملاً */
+    .CodeMirror .comment-line-bg { background: #fef9c3; }
+    /* مربع الخطأ العربي وسطر الخطأ */
+    .arabic-error-box {
+      margin-top: 8px; padding: 10px 12px; border-radius: 10px;
+      background: #fef3c7; color: #7c2d12; border-right: 5px solid #ef4444;
+      font-family: 'Cairo', 'Tajawal', system-ui, sans-serif; font-size: 14px; font-weight: 700;
+      line-height: 1.7; white-space: normal; text-align: right;
+    }
+    .CodeMirror .cm-blank {
+      background: #ffedd5; color: #c2410c !important; font-weight: 900;
+      border-bottom: 2px dashed #f97316; border-radius: 3px;
+    }
+    /* ===== النمط الداكن ===== */
+    body.theme-dark { background: #1e1f22; }
+    .theme-dark .app-header { background: #2b2d30; border-color: #1e1f22; }
+    .theme-dark .app-header h1, .theme-dark .app-header .text-slate-800 { color: #e5e7eb; }
+    .theme-dark .app-header .text-amber-700 { color: #f2b543; }
+    .theme-dark .app-header .bg-slate-100 { background: #3c3f41; border-color: #4b5563; }
+    .theme-dark .app-toolbar { background: #2b2d30; border-color: #3c3f41; }
+    .theme-dark .app-toolbar .bg-white { background: #3c3f41; color: #e5e7eb; border-color: #4b5563; }
+    .theme-dark #editorTabsContainer { background: #1e1f22; border-color: #3c3f41; }
+    .theme-dark #editorTabsContainer > div { background: #2b2d30; color: #9ca3af; }
+    .theme-dark #editorTabsContainer > div.bg-white { background: #3c3f41; color: #93c5fd; border-color: #4b5563; }
+    .theme-dark .app-editor-wrap { background: #1e1f22; }
+    .theme-dark .CodeMirror { background: #1e1f22; color: #bcbec4; }
+    .theme-dark .CodeMirror-gutters { background: #1e1f22; border-color: #3c3f41; }
+    .theme-dark .CodeMirror-linenumber { color: #6b7280; }
+    .theme-dark .CodeMirror-cursor { border-left-color: #e5e7eb; }
+    .theme-dark .CodeMirror-selected, .theme-dark .CodeMirror-focused .CodeMirror-selected { background: #214283; }
+    .theme-dark .CodeMirror-activeline-background { background: #26282e; }
+    .theme-dark .cm-s-eclipse span.cm-keyword { color: #cf8e6d; }
+    .theme-dark .cm-s-eclipse span.cm-string { color: #6aab73; }
+    .theme-dark .cm-s-eclipse span.cm-number { color: #2aacb8; }
+    .theme-dark .cm-s-eclipse span.cm-builtin { color: #8888c6; }
+    .theme-dark .cm-s-eclipse span.cm-def { color: #56a8f5; }
+    .theme-dark .cm-s-eclipse span.cm-variable,
+    .theme-dark .cm-s-eclipse span.cm-variable-2,
+    .theme-dark .cm-s-eclipse span.cm-property,
+    .theme-dark .cm-s-eclipse span.cm-operator { color: #bcbec4; }
+    .theme-dark .CodeMirror .error-line-bg { background: #5c2b2b !important; }
+    .theme-dark .CodeMirror .comment-line-bg { background: #3d3a1e; }
+    .theme-dark .CodeMirror .cm-comment { background: #fef9c3; color: #000 !important; }
+
+    .CodeMirror .error-line-bg { background: #fee2e2 !important; }
     .code-font {
       font-family: 'Fira Code', monospace;
     }
@@ -150,7 +195,7 @@
 <body class="flex flex-col select-none">
 
   <!-- ==================== شريط الرأس العلوي ==================== -->
-  <header class="bg-white border-b border-slate-200 px-3 sm:px-6 py-2 sm:py-2.5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-2 sm:gap-3 z-30 shadow-sm shrink-0">
+  <header class="app-header bg-white border-b border-slate-200 px-3 sm:px-6 py-2 sm:py-2.5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-2 sm:gap-3 z-30 shadow-sm shrink-0">
     <div class="flex items-center gap-2 sm:gap-3">
       <!-- الشعار الرسمي -->
       <div id="schoolLogoTrigger" class="cursor-pointer flex items-center gap-2 sm:gap-3 group" title="مدرسة موضي سلطان العيسى الثانوية بنات">
@@ -204,12 +249,12 @@
     <!-- أزرار المشروع وأرشيف الحلول للطالبة -->
     <div class="flex items-center justify-center gap-2 order-last sm:order-none w-full sm:w-auto">
       <button id="openProjectBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3.5 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 transition-all shadow-sm">
-        <span>🚀</span> مشروع الفترة الأولى
+        <span>🚀</span> افتحي المشروع
       </button>
 
       <!-- زر الاطلاع على الحل المرسل للطالبة (سحابي داخل المنصة) -->
       <button id="viewMySubmissionsBtn" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 transition-all shadow-sm">
-        <span>📋</span> أرشيف حلي المرسل
+        <span>📋</span> الحل الذي تم إرساله
       </button>
     </div>
 
@@ -236,10 +281,10 @@
     <div class="flex-1 flex flex-col min-w-0 bg-white">
       
       <!-- شريط الأدوات العلوي للمحرر -->
-      <div class="bg-slate-100 border-b border-slate-200 px-2 sm:px-4 py-1.5 flex flex-wrap items-center justify-between gap-2 sm:grid sm:grid-cols-[1fr_auto_1fr] shrink-0">
+      <div class="app-toolbar bg-slate-100 border-b border-slate-200 px-2 sm:px-4 py-1.5 flex flex-wrap items-center justify-between gap-2 sm:grid sm:grid-cols-[1fr_auto_1fr] shrink-0">
         <div class="flex items-center gap-2 justify-start min-w-0">
           <!-- زر الإرسال للمعلمة -->
-          <button id="submitToTeacherBtn" class="whitespace-nowrap hidden bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-900 font-black px-5 py-1.5 sm:px-3.5 rounded-lg text-base sm:text-sm flex items-center gap-1.5 shadow-md transition-all">
+          <button id="submitToTeacherBtn" class="whitespace-nowrap hidden bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-900 font-black px-3 py-1.5 sm:px-3.5 rounded-lg text-sm flex items-center gap-1.5 shadow-md transition-all">
             <span>📤</span> إرسال<span class="hidden sm:inline"> جميع ملفات المشروع للمعلمة</span>
           </button>
 
@@ -261,13 +306,15 @@
           </button>
         </div>
 
-        <div class="flex items-center gap-1.5 justify-end min-w-0">
+        <div class="flex items-center gap-1 sm:gap-1.5 justify-end min-w-0">
           <span id="activeFileNameBadge" class="hidden sm:inline-block text-[11px] sm:text-xs font-mono font-bold bg-white text-slate-700 border border-slate-300 px-2 py-0.5 rounded shadow-inner truncate max-w-[100px] sm:max-w-none">
             لا يوجد ملف
           </span>
-          <button id="clearEditorBtn" class="whitespace-nowrap text-slate-600 hover:text-slate-900 border border-slate-300 bg-white hover:bg-slate-50 font-bold px-4 py-1.5 sm:px-2 sm:py-0.5 rounded-lg sm:rounded text-base sm:text-xs shadow-sm sm:shadow-none transition-colors" title="مسح شاشة المحرر">
-            🧹 مسح
+          <button id="resetProjectBtn" class="hidden whitespace-nowrap text-rose-700 border border-rose-300 bg-white hover:bg-rose-50 font-bold px-2.5 py-1.5 sm:px-2 sm:py-0.5 rounded-lg sm:rounded text-sm sm:text-xs shadow-sm sm:shadow-none transition-colors" title="إعادة ملفات المشروع كما أرسلتها المعلمة">🔄 إعادة<span class="hidden sm:inline"> المشروع</span></button>
+          <button id="clearEditorBtn" class="whitespace-nowrap text-slate-600 hover:text-slate-900 border border-slate-300 bg-white hover:bg-slate-50 font-bold px-2.5 py-1.5 sm:px-2 sm:py-0.5 rounded-lg sm:rounded text-sm sm:text-xs shadow-sm sm:shadow-none transition-colors" title="مسح شاشة المحرر">
+            ➕ ملف جديد
           </button>
+          <button id="themeToggleBtn" class="whitespace-nowrap border border-slate-300 bg-white hover:bg-slate-50 font-bold px-2.5 py-1.5 sm:px-2 sm:py-0.5 rounded-lg sm:rounded text-sm sm:text-xs shadow-sm sm:shadow-none transition-colors" title="تغيير النمط: فاتح / داكن">🌙</button>
         </div>
       </div>
 
@@ -275,7 +322,7 @@
       <div id="editorTabsContainer" class="bg-slate-200 border-b border-slate-300 px-2 pt-1 flex items-center gap-1 overflow-x-auto shrink-0 select-none"></div>
 
       <!-- محرر CodeMirror -->
-      <div class="flex-1 relative overflow-hidden bg-white min-h-[140px]">
+      <div class="app-editor-wrap flex-1 relative overflow-hidden bg-white min-h-[140px]">
         <textarea id="codeEditorArea"></textarea>
       </div>
 
@@ -366,6 +413,22 @@
     </div>
   </div>
 
+  <!-- ==================== نافذة تأكيد إعادة المشروع ==================== -->
+  <div id="resetProjectModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[60] p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden text-center">
+      <div class="p-5 sm:p-6 space-y-2">
+        <div class="text-4xl">⚠️</div>
+        <p class="font-black text-slate-800 text-sm sm:text-base">إعادة المشروع لما كان عليه</p>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">سيتم حذف كل ما كتبتِه في ملفات المشروع، وإرجاعها كما أرسلتها المعلمة. لا يمكن التراجع عن ذلك.</p>
+        <p class="text-xs sm:text-sm font-bold text-rose-700">هل أنتِ متأكدة؟</p>
+      </div>
+      <div class="px-5 pb-5 flex gap-2 justify-center">
+        <button id="resetProjectConfirmBtn" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-2 rounded-lg text-sm">نعم، أعيديه</button>
+        <button id="resetProjectCancelBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold px-6 py-2 rounded-lg text-sm">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== نافذة إعلام الطالبة بوجود مشروع ==================== -->
   <div id="newProjectPromptModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[60] p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden text-center">
@@ -388,7 +451,7 @@
       <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="text-emerald-400 text-lg">📋</span>
-          <h3 class="font-black text-sm sm:text-base">أرشيف حلي ومشاريعي المسلمة</h3>
+          <h3 class="font-black text-sm sm:text-base">الحل الذي تم إرساله</h3>
         </div>
         <button id="closeStudentArchiveModalBtn" class="text-slate-400 hover:text-white font-bold text-2xl leading-none">&times;</button>
       </div>
@@ -435,12 +498,13 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">اختاري الاسم :</label>
-            <select id="modalStudentSelect" disabled class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            <label for="modalStudentNameInput" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">اكتبي اسمكِ الثلاثي :</label>
+            <input type="text" id="modalStudentNameInput" autocomplete="name" placeholder="مثال: نورة خالد الأحمد" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            <div class="hidden"><select id="modalStudentSelect" disabled class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
               <option value="">-- حددي الصف لتظهر الأسماء --</option>
-            </select>
+            </select></div>
           </div>
-          <div id="studentPinSection" class="hidden space-y-2 bg-indigo-50/60 border border-indigo-200 rounded-lg p-3">
+          <div id="studentPinSection" style="display:none" class="hidden space-y-2 bg-indigo-50/60 border border-indigo-200 rounded-lg p-3">
             <label id="studentPinLabel" for="studentPinInput" class="block text-xs sm:text-sm font-bold text-indigo-900">🔒 أدخلي رمزكِ السري (4 أرقام):</label>
             <input type="password" id="studentPinInput" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••" class="w-full bg-white border border-indigo-300 rounded-lg p-2 sm:p-2.5 text-lg font-mono text-center tracking-[0.6em] outline-none focus:ring-2 focus:ring-indigo-500">
             <div id="studentPinConfirmWrap" class="hidden">
@@ -1094,6 +1158,42 @@
       });
 
       editor.setValue("");
+      // تظليل أسطر الملاحظات (الأسئلة) بعرض السطر كاملاً
+      const highlightCommentLines = () => {
+        editor.operation(() => {
+          editor.eachLine(h => {
+            const isComment = /^\s*#/.test(h.text);
+            const has = (h.bgClass || "").includes("comment-line-bg");
+            if (isComment && !has) editor.addLineClass(h, "background", "comment-line-bg");
+            else if (!isComment && has) editor.removeLineClass(h, "background", "comment-line-bg");
+          });
+        });
+      };
+      editor.on("change", highlightCommentLines);
+      // تمييز الفراغات ------ بلون برتقالي (خارج النصوص والملاحظات فقط)
+      let blankMarks = [];
+      const highlightBlanks = () => {
+        blankMarks.forEach(m => m.clear());
+        blankMarks = [];
+        editor.eachLine(h => {
+          const line = h.text;
+          if (line.trim().startsWith("#")) return;
+          let masked = line.replace(/(["'])(?:\\.|(?!\1).)*\1/g, m => " ".repeat(m.length));
+          const hashIdx = masked.indexOf("#");
+          if (hashIdx !== -1) masked = masked.slice(0, hashIdx);
+          const re = /-{3,}|_{3,}|[\u2012-\u2015\u2212]+/g;
+          let m;
+          const ln = editor.getLineNumber(h);
+          while ((m = re.exec(masked))) {
+            blankMarks.push(editor.markText({ line: ln, ch: m.index }, { line: ln, ch: m.index + m[0].length }, { className: "cm-blank" }));
+          }
+        });
+      };
+      editor.on("change", highlightBlanks);
+      highlightBlanks();
+      editor.on("change", () => clearErrorLine());
+      highlightCommentLines();
+
       editor.on("change", () => {
         const file = openFiles.find(f => f.name === currentActiveFileName);
         if (file) {
@@ -1192,6 +1292,8 @@
     function updateNextFileBtn() {
       const btn = document.getElementById("nextFileBtn");
       if (btn) btn.classList.toggle("hidden", openFiles.length < 2);
+      const resetBtn = document.getElementById("resetProjectBtn");
+      if (resetBtn) resetBtn.classList.toggle("hidden", !(currentProjectTask && currentUser && currentUser.role === "student"));
     }
 
     function goToNextFile() {
@@ -1291,7 +1393,7 @@
         try {
           const sess = JSON.parse(saved);
           // جلسات الطالبات القديمة بدون رمز سري تتطلب دخولاً جديداً
-          if (sess.role === "teacher" || sess.pinHash) {
+          if (sess.role === "teacher" || (sess.role === "student" && sess.name && sess.class)) {
             setCurrentUser(sess);
             return;
           }
@@ -1407,6 +1509,7 @@
       const classSelect = document.getElementById("modalClassSelect");
       const studentSelect = document.getElementById("modalStudentSelect");
       document.getElementById("modalStageSelect").addEventListener("change", populateLoginClassSelect);
+      document.getElementById("modalStudentNameInput").addEventListener("keydown", (e) => { if (e.key === "Enter") handleStudentLogin(); });
       classSelect.addEventListener("change", (e) => { populateLoginStudentSelect(e.target.value); updatePinSection(); });
       studentSelect.addEventListener("change", () => {
         resetPinInputs();
@@ -1590,9 +1693,57 @@
       document.getElementById("openDbSimBtn").addEventListener("click", openDbDrawer);
       document.getElementById("clearSubmissionsBtn").addEventListener("click", clearSubmissionsList);
 
+      // زر «إعادة المشروع» مع نافذة تأكيد
+      const resetModal = document.getElementById("resetProjectModal");
+      const toggleResetModal = (show) => {
+        resetModal.classList.toggle("hidden", !show);
+        resetModal.classList.toggle("flex", show);
+      };
+      document.getElementById("resetProjectBtn").addEventListener("click", () => {
+        if (currentProjectTask) toggleResetModal(true);
+      });
+      document.getElementById("resetProjectCancelBtn").addEventListener("click", () => toggleResetModal(false));
+      document.getElementById("resetProjectConfirmBtn").addEventListener("click", () => {
+        toggleResetModal(false);
+        if (!currentProjectTask) return;
+        const projectFiles = getTaskProjectFiles(currentProjectTask);
+        projectFiles.forEach(pf => {
+          const f = openFiles.find(x => x.name === pf.name);
+          if (f) f.content = pf.original;
+          else openFiles.push({ name: pf.name, content: pf.original });
+        });
+        const target = projectFiles.some(pf => pf.name === currentActiveFileName) ? currentActiveFileName : projectFiles[0].name;
+        currentActiveFileName = "";
+        switchToFile(target);
+        clearConsole();
+        appendConsoleOutput("🔄 تمت إعادة ملفات المشروع لما كانت عليه.", "#38bdf8");
+      });
+
+      // زر «ملف جديد»: يفتح تبويباً جديداً فارغاً
       document.getElementById("clearEditorBtn").addEventListener("click", () => {
-        editor.setValue("");
+        syncActiveFileContent();
+        let n = 1;
+        while (openFiles.some(f => f.name === `file${n}.py`)) n++;
+        const name = `file${n}.py`;
+        openFiles.push({ name, content: "" });
+        if (editor) editor.setOption("readOnly", false);
+        switchToFile(name);
         editor.focus();
+      });
+
+      // زر النمط الفاتح / الداكن (يُحفظ على جهاز الطالبة)
+      const applyTheme = (dark) => {
+        document.body.classList.toggle("theme-dark", dark);
+        document.getElementById("themeToggleBtn").textContent = dark ? "☀️" : "🌙";
+        if (editor) editor.refresh();
+      };
+      let savedTheme = null;
+      try { savedTheme = localStorage.getItem("modhi_theme"); } catch (e) {}
+      applyTheme(savedTheme === "dark");
+      document.getElementById("themeToggleBtn").addEventListener("click", () => {
+        const dark = !document.body.classList.contains("theme-dark");
+        applyTheme(dark);
+        try { localStorage.setItem("modhi_theme", dark ? "dark" : "light"); } catch (e) {}
       });
 
 
@@ -1650,7 +1801,7 @@
     function openProjectDrawer() {
       drawerMode = "project";
       setDrawerWide(false);
-      openDrawer("🚀 مشروع الفترة الأولى", (container) => {
+      openDrawer("🚀 افتحي المشروع", (container) => {
         if (!currentUser) {
           container.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs">يرجى تسجيل الدخول أولاً لعرض مشروع مرحلتكِ.</div>`;
           return;
@@ -1713,9 +1864,25 @@
         .join("\n");
     }
 
+    // الفراغات التي تضعها المعلمة (------ أو ______) مكان التعليمة الناقصة
+    // يشمل الشرطة الطويلة — التي يحوّل إليها الآيفون والماك "--" تلقائياً
+    const BLANK_RE = /-{3,}|_{3,}|[\u2012-\u2015\u2212]+/;
+    function findBlankLines(text) {
+      const result = [];
+      (text || "").split("\n").forEach((line, i) => {
+        if (line.trim().startsWith("#")) return;
+        let codePart = line.replace(/(["'])(?:\\.|(?!\1).)*\1/g, '""'); // تجاهل النصوص
+        const hashIdx = codePart.indexOf("#");
+        if (hashIdx !== -1) codePart = codePart.slice(0, hashIdx);          // تجاهل الملاحظات
+        if (BLANK_RE.test(codePart)) result.push(i + 1);
+      });
+      return result;
+    }
+
     function fileSolveState(content, original) {
       const mine = codeOnly(content);
       if (!mine) return "empty";
+      if (findBlankLines(content).length) return "blank";
       if (original !== undefined && mine === codeOnly(original)) return "unchanged";
       return "done";
     }
@@ -1741,6 +1908,7 @@
     const SOLVE_STATE_UI = {
       done: { label: "✅ تم العمل عليه", cls: "text-emerald-700 bg-emerald-50 border-emerald-200" },
       unchanged: { label: "⚠️ لم تحلّيه بعد", cls: "text-amber-800 bg-amber-50 border-amber-300" },
+      blank: { label: "✏️ فيه فراغات لم تكمليها", cls: "text-orange-800 bg-orange-50 border-orange-300" },
       empty: { label: "⚠️ فارغ", cls: "text-rose-700 bg-rose-50 border-rose-200" },
       unopened: { label: "⬜ لم تفتحيه بعد", cls: "text-slate-700 bg-slate-100 border-slate-300" }
     };
@@ -1816,6 +1984,7 @@
 
     function clearConsole() {
       document.getElementById("consoleOutputs").innerHTML = "";
+      if (typeof clearErrorLine === "function") clearErrorLine();
     }
 
     function appendConsoleOutput(text, color = "#bcbec4") {
@@ -1857,6 +2026,14 @@
 
       if (!isPyodideReady || !pyodideInstance) {
         appendConsoleOutput("محرك بايثون قيد الإعداد، يرجى الانتظار ثوانٍ قليلة والضغط مجدداً...", "#f75464");
+        return;
+      }
+
+      const blankLines = findBlankLines(rawCode);
+      if (blankLines.length) {
+        showArabicErrorBox(
+          `يوجد فراغ (------) لم تكمليه في السطر ${blankLines.join(" و ")}. اكتبي التعليمة الناقصة مكان الفراغ، ثم اضغطي تشغيل التعليمات البرمجية.`,
+          blankLines[0], "✏️ أكملي الفراغ أولاً");
         return;
       }
 
@@ -1906,13 +2083,13 @@ builtins.input = _pycharm_console_input`);
 
         appendConsoleOutput("\nProcess finished with exit code 0", "#6aab73");
       } catch (err) {
-        handlePyCharmError(err, fileName);
+        handlePyCharmError(err, fileName, sanitizePythonCode(rawCode));
       } finally {
         if (usesSqlite) await afterDbRun(showDbSim);
       }
     }
 
-    function handlePyCharmError(err, fileName = "script.py") {
+    function handlePyCharmError(err, fileName = "script.py", code = "") {
       let raw = err.message || String(err);
       const lines = raw.split("\n");
       const cleanLines = [];
@@ -1934,9 +2111,128 @@ builtins.input = _pycharm_console_input`);
       } else {
         appendConsoleOutput(raw, "#f75464");
       }
+      appendConsoleOutput("Process finished with exit code 1", "#f75464");
+
       const sqlHint = getSqlErrorHint(raw);
-      if (sqlHint) appendConsoleOutput("\n💡 " + sqlHint, "#f59e0b");
-      appendConsoleOutput("\nProcess finished with exit code 1", "#f75464");
+      const pyHint = sqlHint ? "" : getPythonErrorHint(raw, code);
+      const lineMatches = [...raw.matchAll(/File "<exec>", line (\d+)/g)];
+      const errLine = lineMatches.length ? parseInt(lineMatches[lineMatches.length - 1][1], 10) : 0;
+      showArabicErrorBox(sqlHint || pyHint || "يوجد خطأ في التعليمات البرمجية، راجعي الكود.", errLine);
+    }
+
+    // مربع تنبيه عربي واضح أسفل النتائج + تمييز سطر الخطأ في المحرر
+    let errorLineHandle = null;
+    function clearErrorLine() {
+      if (editor && errorLineHandle) {
+        editor.removeLineClass(errorLineHandle, "background", "error-line-bg");
+        errorLineHandle = null;
+      }
+    }
+    function showArabicErrorBox(msg, lineNo, title) {
+      const outputs = document.getElementById("consoleOutputs");
+      const box = document.createElement("div");
+      box.className = "arabic-error-box";
+      box.dir = "rtl";
+      box.innerHTML = `<div class="font-black mb-1"></div><div></div>`;
+      box.firstChild.textContent = title || `⚠️ تنبيه: يوجد خطأ${lineNo ? ` في السطر ${lineNo}` : ""}`;
+      box.lastChild.textContent = msg;
+      outputs.appendChild(box);
+      const consoleEl = document.getElementById("pycharmConsole");
+      if (consoleEl) consoleEl.scrollTop = consoleEl.scrollHeight;
+
+      clearErrorLine();
+      if (editor && lineNo && lineNo <= editor.lineCount()) {
+        errorLineHandle = editor.addLineClass(lineNo - 1, "background", "error-line-bg");
+        editor.scrollIntoView({ line: lineNo - 1, ch: 0 }, 60);
+      }
+    }
+
+    // شرح عربي لأشهر أخطاء بايثون
+    function getPythonErrorHint(raw, code = "") {
+      // رقم السطر في كود الطالبة (آخر إشارة لسطر في الملف)
+      const lineMatches = [...raw.matchAll(/File "<exec>", line (\d+)/g)];
+      const lineNo = lineMatches.length ? parseInt(lineMatches[lineMatches.length - 1][1], 10) : 0;
+      const codeLines = (code || "").split("\n");
+      const lineText = lineNo ? (codeLines[lineNo - 1] || "") : "";
+      const firstWord = (lineText.trim().match(/^[A-Za-z_؀-ۿ][\w؀-ۿ]*|^\S+/) || [""])[0];
+      const at = lineNo ? `في السطر ${lineNo}` : "";
+      const L = lineNo ? `السطر ${lineNo}` : "السطر";
+      let m;
+
+      // ---- أخطاء المسافة البادئة ----
+      // مسافات في مكان تعليمة ناقصة (مشروع فيه فراغات بالمسافات بدل ------)
+      if (/unexpected indent/.test(raw)) {
+        const t = lineText.trim();
+        const BLOCK_KW = /^(if|elif|else|while|for|def|try|except|finally|with|class)\b/;
+        if (/^[\(\[]/.test(t) || (/:\s*(#.*)?$/.test(t) && !BLOCK_KW.test(t)))
+          return `لم تكملي التعليمة الناقصة في بداية ${L}. احذفي المسافات من بداية السطر واكتبي التعليمة الناقصة مكانها.`;
+      }
+      if (/unexpected indent/.test(raw))
+        return `يوجد مسافة زائدة في بداية ${L}${firstWord ? ` قبل ${firstWord}` : ""}. يُمنع وجود مسافة${firstWord ? ` قبل ${firstWord}` : ""} هنا، احذفي المسافات من بداية السطر.`;
+      // بعد if/for/while لا توجد تعليمة (السطر الفارغ أو ملاحظة فقط) ← تعليمة ناقصة
+      if ((m = raw.match(/expected an indented block after '(\w+)' statement on line (\d+)/))) {
+        const startLn = parseInt(m[2], 10);
+        const between = codeLines.slice(startLn, Math.max(startLn, lineNo - 1));
+        if (between.length && between.every(l => !l.trim() || l.trim().startsWith("#")))
+          return `لم تكملي التعليمة الناقصة داخل ${m[1]} في السطر ${startLn}. اكتبيها في السطر ${startLn + 1} بمسافة بادئة.`;
+      }
+      if ((m = raw.match(/expected an indented block(?: after '(\w+)' statement on line (\d+))?/)))
+        return `${L} يجب أن يبدأ بمسافة بادئة (4 مسافات أو Tab)${m[1] ? ` لأنه داخل ${m[1]} في السطر ${m[2]}` : ""}.`;
+      if (/unindent does not match any outer indentation level/.test(raw))
+        return `المسافة في بداية ${L} غير متساوية مع الأسطر التي قبله. اجعلي المسافات متساوية.`;
+      if (/inconsistent use of tabs and spaces|TabError/.test(raw))
+        return `${L} يخلط بين Tab والمسافات في بدايته. استخدمي نوعاً واحداً فقط.`;
+
+      // ---- أخطاء الصياغة ----
+      if (/expected ':'/.test(raw))
+        return `تنقص النقطتان (:) في نهاية ${L}${firstWord ? ` بعد ${firstWord}` : ""}.`;
+      if (/Missing parentheses in call to 'print'/.test(raw))
+        return `اكتبي print مع الأقواس ${at}، مثل: print("مرحبا")`;
+      if (/Maybe you meant '==' or ':=' instead of '='/.test(raw) || /cannot assign to expression here/.test(raw) && /==/.test(raw))
+        return `للمقارنة استخدمي == وليس = ${at}.`;
+      if (/unterminated string literal|EOL while scanning string literal|unterminated triple-quoted/.test(raw))
+        return `علامة التنصيص غير مغلقة ${at}. تأكدي أن النص يبدأ وينتهي بنفس العلامة " أو '.`;
+      if ((m = raw.match(/'([\(\[\{])' was never closed/)))
+        return `القوس ${m[1]} لم يُغلق ${at}.`;
+      if ((m = raw.match(/unmatched '([\)\]\}])'/)))
+        return `يوجد قوس ${m[1]} زائد ${at}.`;
+      if ((m = raw.match(/closing parenthesis '(.)' does not match opening parenthesis '(.)'/)))
+        return `القوس ${m[1]} لا يناسب القوس المفتوح ${m[2]} ${at}.`;
+      if ((m = raw.match(/invalid character '(.)'/)))
+        return `يوجد رمز غير مسموح (${m[1]}) ${at}. اكتبي الرموز بلوحة المفاتيح الإنجليزية، مثل " و , و ( ).`;
+      if (/invalid decimal literal/.test(raw))
+        return `اسم المتغير لا يمكن أن يبدأ برقم ${at}.`;
+      if (/invalid syntax|SyntaxError/.test(raw))
+        return `يوجد خطأ في كتابة التعليمة ${at}. راجعي الأقواس وعلامات التنصيص والنقطتين (:) والكلمات المحجوزة.`;
+
+      // ---- أخطاء أثناء التشغيل ----
+      if ((m = raw.match(/NameError: name '([^']+)' is not defined(?:\. Did you mean: '([^']+)'\?)?/)))
+        return `الاسم (${m[1]}) غير معرّف ${at}.${m[2] ? ` هل تقصدين (${m[2]})؟` : " تأكدي من كتابته بشكل صحيح ومن تعريفه قبل استخدامه، وإذا كان نصاً ضعيه بين علامتي تنصيص."}`;
+      if (/can only concatenate str \(not "(int|float)"\) to str|unsupported operand type\(s\) for \+: '(int|float)' and 'str'/.test(raw))
+        return `لا يمكن جمع نص مع رقم ${at}. حوّلي الرقم إلى نص بـ str() أو النص إلى رقم بـ int().`;
+      if (/not supported between instances of '(str|int|float)' and '(str|int|float)'/.test(raw))
+        return `لا يمكن مقارنة نص برقم ${at}. حوّلي قيمة input إلى رقم بـ int(input()).`;
+      if (/unsupported operand type/.test(raw))
+        return `لا يمكن إجراء هذه العملية بين نوعين مختلفين من البيانات ${at}.`;
+      if ((m = raw.match(/invalid literal for int\(\) with base 10: '([^']*)'/)))
+        return `القيمة '${m[1]}' ليست عدداً صحيحاً، فلا يمكن تحويلها بـ int() ${at}.`;
+      if ((m = raw.match(/could not convert string to float: '([^']*)'/)))
+        return `القيمة '${m[1]}' ليست رقماً، فلا يمكن تحويلها بـ float() ${at}.`;
+      if (/ZeroDivisionError/.test(raw))
+        return `لا يمكن القسمة على صفر ${at}.`;
+      if (/(list|string|tuple) index out of range/.test(raw))
+        return `رقم الموقع (index) أكبر من عدد العناصر ${at}. تذكري أن الترقيم يبدأ من 0.`;
+      if ((m = raw.match(/'(\w+)' object has no attribute '(\w+)'/)))
+        return `الدالة (${m[2]}) غير موجودة لهذا النوع (${m[1]}) ${at}. راجعي اسم الدالة.`;
+      if ((m = raw.match(/'(\w+)' object is not callable/)))
+        return `(${m[1]}) ليس دالة ${at}. ربما استخدمتِ اسم دالة كاسم متغير، أو وضعتِ أقواساً في غير مكانها.`;
+      if ((m = raw.match(/(\w+)\(\) takes (\d+) positional arguments? but (\d+) (?:was|were) given/)))
+        return `الدالة ${m[1]}() تأخذ ${m[2]} قيم، لكنكِ أعطيتِها ${m[3]} ${at}.`;
+      if (/KeyError/.test(raw))
+        return `المفتاح غير موجود في القاموس ${at}.`;
+      if (/ModuleNotFoundError|No module named/.test(raw))
+        return `المكتبة غير موجودة ${at}. راجعي اسمها في تعليمة import.`;
+      return lineNo ? `يوجد خطأ ${at}، راجعيه.` : "";
     }
 
     // تلميحات عربية لأشهر أخطاء قواعد البيانات
@@ -2691,7 +2987,7 @@ if not getattr(sqlite3, "_sim_installed", False):
       updatePinSection();
       refreshStudentsManageList();
       // إذا أعادت المعلمة تعيين رمز الطالبة المسجلة حالياً يتم تسجيل خروجها
-      if (currentUser && currentUser.role === "student" && pinsLoaded) {
+      if (false && currentUser && currentUser.role === "student" && pinsLoaded) {
         const pin = getStudentPin(currentUser.name, currentUser.class);
         if (!pin || pin.hash !== currentUser.pinHash) {
           logout();
@@ -2704,6 +3000,7 @@ if not getattr(sqlite3, "_sim_installed", False):
 
     // إظهار حقل الرمز حسب حالة الطالبة (إنشاء رمز جديد / إدخال الرمز)
     function updatePinSection() {
+      return; // نسخة بدون كلمة مرور
       const cls = document.getElementById("modalClassSelect").value;
       const name = document.getElementById("modalStudentSelect").value;
       const sec = document.getElementById("studentPinSection");
@@ -2741,55 +3038,18 @@ if not getattr(sqlite3, "_sim_installed", False):
 
     async function handleStudentLogin() {
       const cls = document.getElementById("modalClassSelect").value;
-      const name = document.getElementById("modalStudentSelect").value;
-      const pin = document.getElementById("studentPinInput").value.trim();
-      const pin2 = document.getElementById("studentPinConfirmInput").value.trim();
+      const name = document.getElementById("modalStudentNameInput").value.replace(/\s+/g, " ").trim();
       const err = document.getElementById("studentLoginError");
       const fail = (msg) => { err.textContent = msg; err.classList.remove("hidden"); };
 
-      if (!cls || !name) return fail("الرجاء اختيار المرحلة والصف ثم اسمكِ.");
-      if (!pinsLoaded) return fail("جاري الاتصال بالمنصة، حاولي بعد ثوانٍ.");
-      if (Date.now() < pinBlockedUntil) {
-        return fail(`محاولات خاطئة كثيرة، انتظري ${Math.ceil((pinBlockedUntil - Date.now()) / 1000)} ثانية.`);
-      }
-      if (!/^\d{4}$/.test(pin)) return fail("الرمز السري يجب أن يكون 4 أرقام.");
+      if (!cls) return fail("الرجاء اختيار المرحلة والصف.");
+      if (name.length < 3 || name.split(" ").length < 2) return fail("الرجاء كتابة اسمكِ الثلاثي.");
 
-      const sKey = studentKeyOf(name, cls);
-      const hash = await hashPin(sKey, pin);
-      const existing = getStudentPin(name, cls);
-
-      if (existing) {
-        if (existing.hash !== hash) {
-          pinFailedAttempts++;
-          document.getElementById("studentPinInput").value = "";
-          if (pinFailedAttempts >= 5) {
-            pinBlockedUntil = Date.now() + 60000;
-            pinFailedAttempts = 0;
-            return fail("كلمة السر خاطئة، عند نسيانها يرجى مراجعة المعلمة. (انتظري دقيقة قبل المحاولة مجدداً)");
-          }
-          return fail("كلمة السر خاطئة، عند نسيانها يرجى مراجعة المعلمة.");
-        }
-      } else {
-        if (/^(\d)\1{3}$/.test(pin) || pin === "1234" || pin === "4321") return fail("اختاري رمزاً أصعب (لا تستخدمي 1234 أو أرقاماً متكررة).");
-        try {
-          // التأكد أن لا أحد أنشأ رمزاً لهذا الاسم في نفس اللحظة
-          if (rtdb) {
-            const snap = await rtdb.ref(`student_pins/${sKey}`).once("value");
-            if (snap.val()) { allStudentPins[sKey] = snap.val(); updatePinSection(); return fail("تم إنشاء رمز لهذا الاسم مسبقاً. أدخلي الرمز أو اطلبي من المعلمة إعادة تعيينه."); }
-          }
-          const stamp = new Date().toLocaleDateString("ar-KW") + " " + new Date().toLocaleTimeString("ar-KW", { hour: '2-digit', minute: '2-digit' });
-          await writeStudentPin(sKey, { hash, createdAt: stamp });
-          allStudentPins[sKey] = { hash, createdAt: stamp };
-        } catch (e) {
-          return fail("تعذر حفظ الرمز: " + (e.message || e));
-        }
-      }
-
-      pinFailedAttempts = 0;
       err.classList.add("hidden");
-      resetPinInputs();
-      setCurrentUser({ name, class: cls, role: "student", pinHash: hash });
+      document.getElementById("modalStudentNameInput").value = "";
+      setCurrentUser({ name, class: cls, role: "student" });
     }
+
 
     // المعلمة: إعادة تعيين رمز طالبة
     function resetStudentPin(name, cls) {
@@ -2901,7 +3161,7 @@ if not getattr(sqlite3, "_sim_installed", False):
           body: `
             <p>تم إرسال مشروع <b>${escapeHtml(state.task.title)}</b> بنجاح${state.lock.submittedAt ? ` بتاريخ <b>${escapeHtml(state.lock.submittedAt)}</b>` : ""}${state.lock.filesCount ? ` (${state.lock.filesCount} ملفات)` : ""}.</p>
             <p class="font-bold text-rose-700">🔒 لا يمكن إرسال المشروع مرة أخرى إلا إذا سمحت المعلمة بذلك.</p>
-            <p class="text-slate-500">يمكنكِ مراجعة حلكِ المرسل من زر [📋 أرشيف حلي المرسل].</p>`
+            <p class="text-slate-500">يمكنكِ مراجعة حلكِ المرسل من زر [📋 الحل الذي تم إرساله].</p>`
         };
       }
       return {
@@ -3079,7 +3339,7 @@ if not getattr(sqlite3, "_sim_installed", False):
         updateSubmitButtonState();
         alert(`تم إرسال المشروع بنجاح ✅\nتم إرسال جميع الملفات (${allFiles.length}) للمعلمة دفعة واحدة.\n🔒 لا يمكن الإرسال مرة أخرى إلا إذا سمحت المعلمة بذلك.`);
         appendConsoleOutput(`\n✅ تم إرسال جميع ملفات المشروع (${allFiles.length}) للمعلمة.`, "#22c55e");
-        appendConsoleOutput(`// يمكنكِ الاطلاع على نسختكِ المرسلة من خلال [📋 أرشيف حلي المرسل].`, "#38bdf8");
+        appendConsoleOutput(`// يمكنكِ الاطلاع على نسختكِ المرسلة من خلال [📋 الحل الذي تم إرساله].`, "#38bdf8");
       } catch (e) {
         showErr("تعذر الإرسال: " + (e.message || e));
       } finally {
