@@ -413,6 +413,22 @@
     </div>
   </div>
 
+  <!-- ==================== نافذة طلب دخول بنفس الاسم ==================== -->
+  <div id="sameNameRequestModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[70] p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden text-center">
+      <div class="p-5 sm:p-6 space-y-2">
+        <div class="text-4xl">⚠️</div>
+        <p class="font-black text-slate-800 text-sm sm:text-base">تحاول طالبة الدخول باسمكِ من جهاز آخر</p>
+        <p id="sameNameRequestInfo" class="text-xs sm:text-sm text-slate-600"></p>
+        <p class="text-xs sm:text-sm font-bold text-rose-700">هل تسمحين لها بالدخول؟</p>
+      </div>
+      <div class="px-5 pb-5 flex gap-2 justify-center">
+        <button id="sameNameAllowBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg text-sm">سماح</button>
+        <button id="sameNameDenyBtn" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-2 rounded-lg text-sm">منع</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== نافذة تأكيد إعادة المشروع ==================== -->
   <div id="resetProjectModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[60] p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden text-center">
@@ -499,7 +515,10 @@
           </div>
           <div>
             <label for="modalStudentNameInput" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">اكتبي اسمكِ الثلاثي :</label>
-            <input type="text" id="modalStudentNameInput" autocomplete="name" placeholder="مثال: نورة خالد الأحمد" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            <div class="relative">
+            <input type="text" id="modalStudentNameInput" autocomplete="off" placeholder="مثال: نورة خالد الأحمد" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            <div id="nameSuggestBox" class="hidden absolute top-full right-0 left-0 mt-1 bg-white border border-slate-300 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto"></div>
+            </div>
             <div class="hidden"><select id="modalStudentSelect" disabled class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
               <option value="">-- حددي الصف لتظهر الأسماء --</option>
             </select></div>
@@ -514,6 +533,11 @@
             <p id="studentPinHint" class="text-[11px] text-indigo-700"></p>
           </div>
           <div id="studentLoginError" class="text-xs font-bold text-rose-600 hidden text-center"></div>
+          <div id="loginWaitBox" class="hidden text-center bg-sky-50 border border-sky-200 rounded-lg p-3 space-y-2">
+            <p class="text-xs sm:text-sm font-bold text-sky-900">⏳ هذا الاسم دخل المنصة من جهاز آخر.</p>
+            <p class="text-xs text-sky-800">أُرسل طلب لصاحبة الاسم وللمعلمة للسماح لكِ بالدخول، انتظري قليلاً...</p>
+            <button id="cancelLoginWaitBtn" type="button" class="text-xs font-bold text-slate-600 underline">إلغاء الطلب</button>
+          </div>
           <button id="confirmStudentLoginBtn" class="sticky bottom-0 w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 sm:py-2.5 rounded-lg text-base sm:text-sm shadow-md transition-all mt-1">
             دخول المنصة 🚀
           </button>
@@ -901,6 +925,8 @@
       listenToCloudSubmissions();
       listenToSubmissionLocks();
       listenToStudentPins();
+      listenToStudentLogins();
+      listenToLoginRequests();
       listenToCloudStudentsRoster();
       await initPyodide();
     });
@@ -1102,8 +1128,39 @@
       }
 
       const students = STUDENTS_DATABASE[cls] || [];
-      const withPin = students.filter(n => getStudentPin(n, cls)).length;
-      label.textContent = `طالبات (${cls}) - العدد: ${students.length} · أنشأت رمزها: ${withPin}`;
+      const classLogins = getClassLogins(cls);
+      const pendingReqs = Object.entries(allLoginRequests || {}).filter(([k, r]) => r && r.class === cls && r.status === "pending");
+      if (pendingReqs.length) {
+        const box = document.createElement("div");
+        box.className = "mb-2 p-2 bg-sky-50 border border-sky-200 rounded text-xs space-y-1";
+        box.innerHTML = `<div class="font-bold text-sky-900">🔔 طلبات دخول بنفس الاسم من جهاز آخر:</div>`;
+        pendingReqs.forEach(([k, r]) => {
+          const row = document.createElement("div");
+          row.className = "flex items-center justify-between gap-2";
+          row.innerHTML = `<span class="font-bold text-slate-800"></span><span class="flex gap-1 shrink-0">
+            <button class="allow-req bg-emerald-600 text-white px-2 py-0.5 rounded font-bold">سماح</button>
+            <button class="deny-req bg-rose-600 text-white px-2 py-0.5 rounded font-bold">منع</button></span>`;
+          row.firstChild.textContent = `${r.name} — ${r.time || ""}`;
+          row.querySelector(".allow-req").addEventListener("click", () => answerLoginRequest(k, true));
+          row.querySelector(".deny-req").addEventListener("click", () => answerLoginRequest(k, false));
+          box.appendChild(row);
+        });
+        listContainer.appendChild(box);
+      }
+      const loginOf = (n) => classLogins.find(l => normName(l.name) === normName(n));
+      const loggedCount = students.filter(n => loginOf(n)).length;
+      label.textContent = `طالبات (${cls}) - العدد: ${students.length} · دخلت المنصة: ${loggedCount}`;
+      if (classLogins.length) {
+        const clearAll = document.createElement("button");
+        clearAll.className = "mb-2 text-[11px] text-sky-700 bg-sky-50 border border-sky-200 px-2 py-1 rounded font-bold";
+        clearAll.textContent = `↺ مسح سجل الدخول لكل طالبات (${cls})`;
+        let armed = false;
+        clearAll.addEventListener("click", () => {
+          if (!armed) { armed = true; clearAll.textContent = "اضغطي مرة أخرى للتأكيد"; setTimeout(() => { armed = false; clearAll.textContent = `↺ مسح سجل الدخول لكل طالبات (${cls})`; }, 4000); return; }
+          classLogins.forEach(l => clearStudentLogin(l._key));
+        });
+        listContainer.appendChild(clearAll);
+      }
 
       if (students.length === 0) {
         listContainer.innerHTML = `<div class="text-xs text-amber-700 p-2 italic">لا توجد طالبات في هذا الصف حتى الآن. يمكنكِ لصق الأسماء بالأسفل ثم الضغط على حفظ.</div>`;
@@ -1113,15 +1170,19 @@
       students.forEach((name, idx) => {
         const row = document.createElement("div");
         row.className = "flex items-center justify-between p-1.5 hover:bg-slate-50 border-b border-slate-100 text-xs";
-        const pinInfo = getStudentPin(name, cls);
+        const pinInfo = null; // نسخة بدون كلمة مرور
+        const login = loginOf(name);
         row.innerHTML = `
           <span class="font-bold text-slate-800">${idx + 1}. ${name}
-            <span class="text-[10px] font-semibold ${pinInfo ? "text-emerald-600" : "text-slate-400"}">${pinInfo ? "🔐 أنشأت رمزها" : "⚪ لم تدخل بعد"}</span></span>
+            <span class="text-[10px] font-semibold ${login ? "text-emerald-600" : "text-slate-400"}">${login ? `✅ دخلت · ${login.lastLogin || ""}` : "⚪ لم تدخل بعد"}</span></span>
           <span class="flex items-center gap-1 shrink-0">
+          ${login ? `<button class="clear-login-btn text-[11px] text-sky-700 hover:text-sky-900 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded font-bold transition-all" title="مسح سجل الدخول وربط الجهاز">↺ مسح الدخول</button>` : ""}
           ${pinInfo ? `<button class="reset-pin-btn text-[11px] text-indigo-700 hover:text-indigo-900 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded font-bold transition-all" title="إعادة تعيين الرمز السري">🔄 إعادة تعيين كلمة المرور</button>` : ""}
           <button data-idx="${idx}" class="delete-student-btn text-[11px] text-rose-600 hover:text-rose-800 bg-rose-50 px-2 py-0.5 rounded font-bold transition-all">حذف 🗑</button>
           </span>
         `;
+        const clearLoginBtn = row.querySelector(".clear-login-btn");
+        if (clearLoginBtn) clearLoginBtn.addEventListener("click", () => clearStudentLogin(login._key));
         const resetBtn = row.querySelector(".reset-pin-btn");
         if (resetBtn) resetBtn.addEventListener("click", () => resetStudentPin(name, cls));
         row.querySelector(".delete-student-btn").addEventListener("click", () => {
@@ -1131,6 +1192,23 @@
         });
         listContainer.appendChild(row);
       });
+
+      // أسماء دخلت بهذا الصف لكنها غير موجودة في القائمة (اسم مكتوب بشكل مختلف)
+      const unknown = classLogins.filter(l => !students.some(n => normName(n) === normName(l.name)));
+      if (unknown.length) {
+        const box = document.createElement("div");
+        box.className = "mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs";
+        box.innerHTML = `<div class="font-bold text-amber-800 mb-1">⚠️ دخلت بأسماء غير موجودة في القائمة:</div>`;
+        unknown.forEach(l => {
+          const d = document.createElement("div");
+          d.className = "flex items-center justify-between gap-2 text-slate-700";
+          d.innerHTML = `<span></span><button class="text-[11px] text-sky-700 bg-white border border-sky-200 px-2 py-0.5 rounded font-bold">↺ مسح</button>`;
+          d.firstChild.textContent = `• ${l.name} — ${l.lastLogin || ""}`;
+          d.lastChild.addEventListener("click", () => clearStudentLogin(l._key));
+          box.appendChild(d);
+        });
+        listContainer.appendChild(box);
+      }
     }
 
     function initEditor() {
@@ -1437,6 +1515,7 @@
       hideLoginModal();
       projectPromptShownFor = null;
       maybeShowNewProjectPrompt();
+      if (user.role === "student") startOwnerRequestListener(); else stopOwnerRequestListener();
     }
 
     // محاكاة قواعد البيانات متاحة لطالبات الحادي عشر والمعلمة فقط
@@ -1451,6 +1530,7 @@
     }
 
     function logout() {
+      stopOwnerRequestListener();
       currentUser = null;
       hideNewProjectPrompt();
       currentProjectTask = null;
@@ -1510,6 +1590,12 @@
       const studentSelect = document.getElementById("modalStudentSelect");
       document.getElementById("modalStageSelect").addEventListener("change", populateLoginClassSelect);
       document.getElementById("modalStudentNameInput").addEventListener("keydown", (e) => { if (e.key === "Enter") handleStudentLogin(); });
+      document.getElementById("cancelLoginWaitBtn").addEventListener("click", cancelLoginWait);
+      document.getElementById("sameNameAllowBtn").addEventListener("click", () => { if (ownerRequestRef) answerLoginRequest(ownerRequestRef.sKey, true); });
+      document.getElementById("sameNameDenyBtn").addEventListener("click", () => { if (ownerRequestRef) answerLoginRequest(ownerRequestRef.sKey, false); });
+      document.getElementById("modalStudentNameInput").addEventListener("input", updateNameSuggestions);
+      document.getElementById("modalStudentNameInput").addEventListener("focus", updateNameSuggestions);
+      document.getElementById("modalStudentNameInput").addEventListener("blur", () => setTimeout(() => document.getElementById("nameSuggestBox").classList.add("hidden"), 150));
       classSelect.addEventListener("change", (e) => { populateLoginStudentSelect(e.target.value); updatePinSection(); });
       studentSelect.addEventListener("change", () => {
         resetPinInputs();
@@ -2969,6 +3055,177 @@ if not getattr(sqlite3, "_sim_installed", False):
       return Promise.resolve();
     }
 
+    // ==================== توقع الاسم + سجل دخول الطالبات ====================
+    const NAME_SUGGEST_CLASSES = ["10-3"];   // الصفوف التي يظهر فيها توقع الاسم
+    let allStudentLogins = {};
+
+    function normName(n) {
+      return String(n || "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي")
+        .replace(/[\u064B-\u0652]/g, "").replace(/\s+/g, " ").trim();
+    }
+
+    function updateNameSuggestions() {
+      const box = document.getElementById("nameSuggestBox");
+      const input = document.getElementById("modalStudentNameInput");
+      const cls = document.getElementById("modalClassSelect").value;
+      const q = normName(input.value);
+      const roster = NAME_SUGGEST_CLASSES.includes(cls) ? (STUDENTS_DATABASE[cls] || []) : [];
+      const matches = q ? roster.filter(n => normName(n).includes(q) && normName(n) !== q).slice(0, 6) : [];
+      if (!matches.length) { box.classList.add("hidden"); box.innerHTML = ""; return; }
+      box.innerHTML = "";
+      matches.forEach(n => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "block w-full text-right px-3 py-2 text-sm font-bold text-slate-800 hover:bg-blue-50 border-b border-slate-100 last:border-0";
+        b.textContent = n;
+        b.addEventListener("mousedown", (e) => e.preventDefault());
+        b.addEventListener("click", () => {
+          input.value = n;
+          box.classList.add("hidden");
+        });
+        box.appendChild(b);
+      });
+      box.classList.remove("hidden");
+    }
+
+    // ===== منع الدخول بنفس الاسم من جهاز آخر دون موافقة =====
+    function getDeviceId() {
+      let id = null;
+      try { id = localStorage.getItem("modhi_device_id"); } catch (e) {}
+      if (!id) {
+        id = Math.random().toString(36).slice(2) + Date.now().toString(36);
+        try { localStorage.setItem("modhi_device_id", id); } catch (e) {}
+      }
+      return id;
+    }
+    function nowStamp() {
+      return new Date().toLocaleDateString("ar-KW") + " " + new Date().toLocaleTimeString("ar-KW", { hour: '2-digit', minute: '2-digit' });
+    }
+
+    let allLoginRequests = {};
+    let pendingLoginWatch = null;   // جهاز ينتظر الموافقة
+    let ownerRequestRef = null;     // صاحبة الاسم تستقبل الطلبات
+
+    function listenToLoginRequests() {
+      if (!rtdb) return;
+      rtdb.ref("login_requests").on("value", (snap) => {
+        allLoginRequests = snap.val() || {};
+        refreshStudentsManageList();
+      });
+    }
+
+    function answerLoginRequest(sKey, allow) {
+      if (!rtdb) return;
+      rtdb.ref(`login_requests/${sKey}/status`).set(allow ? "approved" : "denied");
+    }
+
+    function cancelLoginWait() {
+      if (pendingLoginWatch) {
+        pendingLoginWatch.ref.off("value", pendingLoginWatch.cb);
+        pendingLoginWatch.ref.remove().catch(() => {});
+        pendingLoginWatch = null;
+      }
+      document.getElementById("loginWaitBox").classList.add("hidden");
+      document.getElementById("confirmStudentLoginBtn").disabled = false;
+    }
+
+    // صاحبة الاسم: تظهر لها نافذة السماح/المنع
+    function startOwnerRequestListener() {
+      stopOwnerRequestListener();
+      if (!rtdb || !currentUser || currentUser.role !== "student") return;
+      const sKey = studentKeyOf(currentUser.name, currentUser.class);
+      const ref = rtdb.ref(`login_requests/${sKey}`);
+      const modal = document.getElementById("sameNameRequestModal");
+      const cb = (snap) => {
+        const r = snap.val();
+        const show = !!(r && r.status === "pending" && r.deviceId !== getDeviceId());
+        if (show) document.getElementById("sameNameRequestInfo").textContent = `الاسم: ${r.name} · ${r.time || ""}`;
+        modal.classList.toggle("hidden", !show);
+        modal.classList.toggle("flex", show);
+      };
+      ref.on("value", cb);
+      ownerRequestRef = { ref, cb, sKey };
+    }
+    function stopOwnerRequestListener() {
+      if (ownerRequestRef) { ownerRequestRef.ref.off("value", ownerRequestRef.cb); ownerRequestRef = null; }
+      const modal = document.getElementById("sameNameRequestModal");
+      if (modal) { modal.classList.add("hidden"); modal.classList.remove("flex"); }
+    }
+
+    // يرجع true إذا سُمح بالدخول مباشرة، أو false إذا أُرسل طلب موافقة
+    async function checkSameNameLogin(name, cls, onApproved) {
+      if (!rtdb) return true;
+      const sKey = studentKeyOf(name, cls);
+      const dev = getDeviceId();
+      let rec = null;
+      try { rec = (await rtdb.ref(`student_logins/${sKey}`).once("value")).val(); } catch (e) { return true; }
+      const devices = (rec && rec.devices) || {};
+      if (!rec || !Object.keys(devices).length || devices[dev]) return true;
+
+      const reqId = dev + "_" + Date.now();
+      const ref = rtdb.ref(`login_requests/${sKey}`);
+      await ref.set({ reqId, deviceId: dev, name, class: cls, time: nowStamp(), status: "pending" });
+      document.getElementById("loginWaitBox").classList.remove("hidden");
+      document.getElementById("confirmStudentLoginBtn").disabled = true;
+      const cb = (snap) => {
+        const r = snap.val();
+        if (!r || r.reqId !== reqId) return;
+        if (r.status === "approved") {
+          cancelLoginWait();
+          onApproved();
+        } else if (r.status === "denied") {
+          cancelLoginWait();
+          const err = document.getElementById("studentLoginError");
+          err.textContent = "❌ تم رفض الدخول بهذا الاسم. إذا كان هذا اسمكِ يرجى مراجعة المعلمة.";
+          err.classList.remove("hidden");
+        }
+      };
+      ref.on("value", cb);
+      pendingLoginWatch = { ref, cb };
+      return false;
+    }
+
+    function recordStudentLogin(name, cls) {
+      const sKey = studentKeyOf(name, cls);
+      const stamp = new Date().toLocaleDateString("ar-KW") + " " + new Date().toLocaleTimeString("ar-KW", { hour: '2-digit', minute: '2-digit' });
+      const value = { name, class: cls, lastLogin: stamp };
+      if (rtdb) {
+        value[`devices/${getDeviceId()}`] = true;
+        rtdb.ref(`student_logins/${sKey}`).update(value).catch(() => {});
+      } else {
+        allStudentLogins[sKey] = value;
+        try { localStorage.setItem("local_student_logins", JSON.stringify(allStudentLogins)); } catch (e) {}
+        refreshStudentsManageList();
+      }
+    }
+
+    function listenToStudentLogins() {
+      if (!rtdb) {
+        try { allStudentLogins = JSON.parse(localStorage.getItem("local_student_logins") || "{}") || {}; } catch (e) { allStudentLogins = {}; }
+        return;
+      }
+      rtdb.ref("student_logins").on("value", (snap) => {
+        allStudentLogins = snap.val() || {};
+        refreshStudentsManageList();
+      });
+    }
+
+    function getClassLogins(cls) {
+      return Object.entries(allStudentLogins || {}).filter(([k, l]) => l && l.class === cls).map(([k, l]) => Object.assign({ _key: k }, l));
+    }
+
+    // المعلمة: مسح سجل دخول طالبة (بعد التجربة أو عند تغيير الجهاز)
+    function clearStudentLogin(key) {
+      if (rtdb) {
+        rtdb.ref(`student_logins/${key}`).remove().catch(() => {});
+        rtdb.ref(`login_requests/${key}`).remove().catch(() => {});
+      } else {
+        delete allStudentLogins[key];
+        try { localStorage.setItem("local_student_logins", JSON.stringify(allStudentLogins)); } catch (e) {}
+        refreshStudentsManageList();
+      }
+    }
+
     function listenToStudentPins() {
       if (!rtdb) {
         try { allStudentPins = JSON.parse(localStorage.getItem("local_student_pins") || "{}") || {}; } catch (e) { allStudentPins = {}; }
@@ -3046,8 +3303,18 @@ if not getattr(sqlite3, "_sim_installed", False):
       if (name.length < 3 || name.split(" ").length < 2) return fail("الرجاء كتابة اسمكِ الثلاثي.");
 
       err.classList.add("hidden");
-      document.getElementById("modalStudentNameInput").value = "";
-      setCurrentUser({ name, class: cls, role: "student" });
+      document.getElementById("nameSuggestBox").classList.add("hidden");
+      const finishLogin = () => {
+        document.getElementById("modalStudentNameInput").value = "";
+        recordStudentLogin(name, cls);
+        setCurrentUser({ name, class: cls, role: "student" });
+      };
+      const btn = document.getElementById("confirmStudentLoginBtn");
+      btn.disabled = true;
+      let allowed = true;
+      try { allowed = await checkSameNameLogin(name, cls, finishLogin); } catch (e) { allowed = true; }
+      btn.disabled = !allowed;
+      if (allowed) finishLogin();
     }
 
 
